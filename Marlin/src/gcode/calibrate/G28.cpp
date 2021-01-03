@@ -344,6 +344,9 @@ void GcodeSuite::G28() {
 
     #endif
 
+  // home z first  - as this is safer for the PNP machine
+      homeaxis(Z_AXIS);
+
     // Home Y (before X)
     if (ENABLED(HOME_Y_BEFORE_X) && (doY || (ENABLED(CODEPENDENT_XY_HOMING) && doX)))
       homeaxis(Y_AXIS);

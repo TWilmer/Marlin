@@ -1435,6 +1435,7 @@ void set_axis_is_at_home(const AxisEnum axis) {
     current_position[axis] = base_home_pos(axis);
   #endif
 
+
   /**
    * Z Probe Z Homing? Account for the probe's Z offset.
    */
@@ -1505,7 +1506,26 @@ void set_axis_not_trusted(const AxisEnum axis) {
 
 void homeaxis(const AxisEnum axis) {
 
-  #if IS_SCARA
+  // I'm using a Z-Center stop. So if the Switch is pressed the head has to come up
+  if (axis == Z_AXIS)
+  {
+    endstops.poll();
+     SERIAL_PRINTF("Home  state: %x  cur %f", READ(Z_MIN_PIN),current_position.z);
+    
+    while (READ(Z_MIN_PIN))
+    {
+      SERIAL_PRINTF("Home  state: %x  cur %f", READ(Z_MIN_PIN),current_position.z);
+      
+      destination=current_position;
+      destination.z=destination.z+10;
+      endstops.hit_on_purpose();
+      do_blocking_move_to(destination);
+      endstops.poll();
+    }
+    endstops.global_enabled();
+  }
+
+#if IS_SCARA
     // Only Z homing (with probe) is permitted
     if (axis != Z_AXIS) { BUZZ(100, 880); return; }
   #else
@@ -1566,6 +1586,8 @@ void homeaxis(const AxisEnum axis) {
   #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH)
     if (axis == Z_AXIS && bltouch.deploy()) return; // The initial DEPLOY
   #endif
+
+
 
   do_homing_move(axis, 1.5f * max_length(
     #if ENABLED(DELTA)
