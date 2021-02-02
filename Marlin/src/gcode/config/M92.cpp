@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
 
@@ -25,9 +25,14 @@
 
 void report_M92(const bool echo=true, const int8_t e=-1) {
   if (echo) SERIAL_ECHO_START(); else SERIAL_CHAR(' ');
-  SERIAL_ECHOPAIR_P(PSTR(" M92 X"), LINEAR_UNIT(planner.settings.axis_steps_per_mm[X_AXIS]),
-                          SP_Y_STR, LINEAR_UNIT(planner.settings.axis_steps_per_mm[Y_AXIS]),
-                          SP_Z_STR, LINEAR_UNIT(planner.settings.axis_steps_per_mm[Z_AXIS]));
+  SERIAL_ECHOPAIR_P(LIST_N(DOUBLE(LINEAR_AXES),
+    PSTR(" M92 X"), LINEAR_UNIT(planner.settings.axis_steps_per_mm[X_AXIS]),
+    SP_Y_STR, LINEAR_UNIT(planner.settings.axis_steps_per_mm[Y_AXIS]),
+    SP_Z_STR, LINEAR_UNIT(planner.settings.axis_steps_per_mm[Z_AXIS]),
+    SP_I_STR, LINEAR_UNIT(planner.settings.axis_steps_per_mm[I_AXIS]),
+    SP_J_STR, LINEAR_UNIT(planner.settings.axis_steps_per_mm[J_AXIS]),
+    SP_K_STR, LINEAR_UNIT(planner.settings.axis_steps_per_mm[K_AXIS]))
+  );
   #if DISABLED(DISTINCT_E_FACTORS)
     SERIAL_ECHOPAIR_P(SP_E_STR, VOLUMETRIC_UNIT(planner.settings.axis_steps_per_mm[E_AXIS]));
   #endif
@@ -64,13 +69,12 @@ void GcodeSuite::M92() {
   if (target_extruder < 0) return;
 
   // No arguments? Show M92 report.
-  if (!parser.seen("XYZE"
-    #if ENABLED(MAGIC_NUMBERS_GCODE)
-      "HL"
-    #endif
+  if (!parser.seen("E"
+    GANG_N(LINEAR_AXES, "X", "Y", "Z", AXIS4_STR, AXIS5_STR, AXIS6_STR)
+    TERN_(MAGIC_NUMBERS_GCODE, "HL")
   )) return report_M92(true, target_extruder);
 
-  LOOP_XYZE(i) {
+  LOOP_NUM_AXIS(i) { // TODO (DerAndere): Test LOOP_NUM_AXIS_N
     if (parser.seenval(axis_codes[i])) {
       if (i == E_AXIS) {
         const float value = parser.value_per_axis_units((AxisEnum)(E_AXIS_N(target_extruder)));
@@ -86,6 +90,9 @@ void GcodeSuite::M92() {
       }
       else {
         planner.settings.axis_steps_per_mm[i] = parser.value_per_axis_units((AxisEnum)i);
+        #if LINEAR_AXES >= 4 // FIXME (DerAndere): Work around issue that actual internal steps_per_mm for the I_AXIS is only a quater of the STEPS_PER_UNIT
+          if (i == 3) planner.settings.axis_steps_per_mm[i] *= 4.0f;
+        #endif
       }
     }
   }
@@ -105,7 +112,7 @@ void GcodeSuite::M92() {
       if (wanted) {
         const float best = uint16_t(wanted / z_full_step_mm) * z_full_step_mm;
         SERIAL_ECHOPAIR(", best:[", best);
-        if (best != wanted) { SERIAL_CHAR(','); SERIAL_ECHO(best + z_full_step_mm); }
+        if (best != wanted) { SERIAL_CHAR(','); SERIAL_DECIMAL(best + z_full_step_mm); }
         SERIAL_CHAR(']');
       }
       SERIAL_ECHOLNPGM(" }");

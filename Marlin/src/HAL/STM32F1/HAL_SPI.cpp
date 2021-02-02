@@ -17,16 +17,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
 
 /**
  * Software SPI functions originally from Arduino Sd2Card Library
  * Copyright (c) 2009 by William Greiman
- */
-
-/**
  * Adapted to the STM32F1 HAL
  */
 

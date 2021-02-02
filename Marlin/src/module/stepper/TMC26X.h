@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
 #pragma once
@@ -101,6 +101,30 @@ void tmc26x_init_to_defaults();
   #define Z4_ENABLE_INIT() NOOP
   #define Z4_ENABLE_WRITE(STATE) stepperZ4.setEnabled(STATE)
   #define Z4_ENABLE_READ() stepperZ4.isEnabled()
+#endif
+
+// I Stepper
+#if HAS_I_ENABLE && AXIS_DRIVER_TYPE_I(TMC26X)
+  extern TMC26XStepper stepperI;
+  #define I_ENABLE_INIT() NOOP
+  #define I_ENABLE_WRITE(STATE) stepperI.setEnabled(STATE)
+  #define I_ENABLE_READ() stepperI.isEnabled()
+#endif
+
+// J Stepper
+#if HAS_J_ENABLE && AXIS_DRIVER_TYPE_J(TMC26X)
+  extern TMC26XStepper stepperJ;
+  #define J_ENABLE_INIT() NOOP
+  #define J_ENABLE_WRITE(STATE) stepperJ.setEnabled(STATE)
+  #define J_ENABLE_READ() stepperJ.isEnabled()
+#endif
+
+// K Stepper
+#if HAS_K_ENABLE && AXIS_DRIVER_TYPE_K(TMC26X)
+  extern TMC26XStepper stepperK;
+  #define K_ENABLE_INIT() NOOP
+  #define K_ENABLE_WRITE(STATE) stepperK.setEnabled(STATE)
+  #define K_ENABLE_READ() stepperK.isEnabled()
 #endif
 
 // E0 Stepper

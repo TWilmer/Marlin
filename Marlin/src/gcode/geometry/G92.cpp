@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
 
@@ -47,16 +47,16 @@ void GcodeSuite::G92() {
       case 1: {
         // Zero the G92 values and restore current position
         #if !IS_SCARA
-          LOOP_XYZ(i) if (position_shift[i]) {
+          LOOP_LINEAR(i) if (position_shift[i]) {
             position_shift[i] = 0;
             update_workspace_offset((AxisEnum)i);
-          }
+          } // TODO: Add support for LINEAR_AXES >= 4
         #endif // Not SCARA
       } return;
     #endif
     #if ENABLED(POWER_LOSS_RECOVERY)
       case 9: {
-        LOOP_XYZE(i) {
+        LOOP_NUM_AXIS(i) {
           if (parser.seenval(axis_codes[i])) {
             current_position[i] = parser.value_axis_units((AxisEnum)i);
             if (i == E_AXIS) sync_E = true; else sync_XYZ = true;
@@ -65,7 +65,7 @@ void GcodeSuite::G92() {
       } break;
     #endif
     case 0: {
-      LOOP_XYZE(i) {
+      LOOP_NUM_AXIS(i) {
         if (parser.seenval(axis_codes[i])) {
           const float l = parser.value_axis_units((AxisEnum)i),
                       v = i == E_AXIS ? l : LOGICAL_TO_NATIVE(l, i),
@@ -99,5 +99,7 @@ void GcodeSuite::G92() {
   if    (sync_XYZ) sync_plan_position();
   else if (sync_E) sync_plan_position_e();
 
-  report_current_position();
+  #if DISABLED(DIRECT_STEPPING)
+    report_current_position();
+  #endif
 }

@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
 
@@ -37,7 +37,7 @@
  * ***              In the 2.0 release, it will simply be disabled by default.
  */
 void GcodeSuite::M206() {
-  LOOP_XYZ(i)
+  LOOP_LINEAR(i)
     if (parser.seen(XYZ_CHAR(i)))
       set_home_offset((AxisEnum)i, parser.value_linear_units());
 
@@ -61,10 +61,10 @@ void GcodeSuite::M206() {
  *       Use M206 to set these values directly.
  */
 void GcodeSuite::M428() {
-  if (axis_unhomed_error()) return;
+  if (homing_needed_error()) return;
 
   xyz_float_t diff;
-  LOOP_XYZ(i) {
+  LOOP_LINEAR(i) {
     diff[i] = base_home_pos((AxisEnum)i) - current_position[i];
     if (!WITHIN(diff[i], -20, 20) && home_dir((AxisEnum)i) > 0)
       diff[i] = -current_position[i];
@@ -76,7 +76,7 @@ void GcodeSuite::M428() {
     }
   }
 
-  LOOP_XYZ(i) set_home_offset((AxisEnum)i, diff[i]);
+  LOOP_LINEAR(i) set_home_offset((AxisEnum)i, diff[i]);
   report_current_position();
   LCD_MESSAGEPGM(MSG_HOME_OFFSETS_APPLIED);
   BUZZ(100, 659);

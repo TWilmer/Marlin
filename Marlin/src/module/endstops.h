@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
 #pragma once
@@ -29,8 +29,8 @@
 #include <stdint.h>
 
 enum EndstopEnum : char {
-  X_MIN,  Y_MIN,  Z_MIN,  Z_MIN_PROBE,
-  X_MAX,  Y_MAX,  Z_MAX,
+  X_MIN,  Y_MIN,  Z_MIN,  Z_MIN_PROBE,  I_MIN,  J_MIN,  K_MIN,
+  X_MAX,  Y_MAX,  Z_MAX,  I_MAX,  J_MAX,  K_MAX,
   X2_MIN, X2_MAX,
   Y2_MIN, Y2_MAX,
   Z2_MIN, Z2_MAX,
@@ -38,33 +38,38 @@ enum EndstopEnum : char {
   Z4_MIN, Z4_MAX
 };
 
+#define X_ENDSTOP (X_HOME_DIR < 0 ? X_MIN : X_MAX)
+#define Y_ENDSTOP (Y_HOME_DIR < 0 ? Y_MIN : Y_MAX)
+#define Z_ENDSTOP (Z_HOME_DIR < 0 ? TERN(HOMING_Z_WITH_PROBE, Z_MIN, Z_MIN_PROBE) : Z_MAX)
+
 class Endstops {
   public:
-    #if HAS_EXTRA_ENDSTOPS
+    #if LINEAR_AXES >=4 || ENABLED(HAS_EXTRA_ENDSTOPS)
       typedef uint16_t esbits_t;
-      #if ENABLED(X_DUAL_ENDSTOPS)
-        static float x2_endstop_adj;
-      #endif
-      #if ENABLED(Y_DUAL_ENDSTOPS)
-        static float y2_endstop_adj;
-      #endif
-      #if ENABLED(Z_MULTI_ENDSTOPS)
-        static float z2_endstop_adj;
-      #endif
+    #else
+      typedef uint8_t esbits_t;
+    #endif
+
+    #if HAS_EXTRA_ENDSTOPS
+      TERN_(X_DUAL_ENDSTOPS, static float x2_endstop_adj);
+      TERN_(Y_DUAL_ENDSTOPS, static float y2_endstop_adj);
+      TERN_(Z_MULTI_ENDSTOPS, static float z2_endstop_adj);
       #if ENABLED(Z_MULTI_ENDSTOPS) && NUM_Z_STEPPER_DRIVERS >= 3
         static float z3_endstop_adj;
       #endif
       #if ENABLED(Z_MULTI_ENDSTOPS) && NUM_Z_STEPPER_DRIVERS >= 4
         static float z4_endstop_adj;
       #endif
-    #else
-      typedef uint8_t esbits_t;
     #endif
-
+    
   private:
     static bool enabled, enabled_globally;
     static esbits_t live_state;
-    static volatile uint8_t hit_state;      // Use X_MIN, Y_MIN, Z_MIN and Z_MIN_PROBE as BIT index
+    #if LINEAR_AXES >= 4
+      static volatile uint16_t hit_state;      // Use X_MIN, Y_MIN, Z_MIN and Z_MIN_PROBE as BIT index
+    #else
+      static volatile uint8_t hit_state;      // Use X_MIN, Y_MIN, Z_MIN and Z_MIN_PROBE as BIT index
+    #endif
 
     #if ENDSTOP_NOISE_THRESHOLD
       static esbits_t validated_live_state;
@@ -83,11 +88,7 @@ class Endstops {
      * Are endstops or the probe set to abort the move?
      */
     FORCE_INLINE static bool abort_enabled() {
-      return (enabled
-        #if HAS_BED_PROBE
-          || z_probe_enabled
-        #endif
-      );
+      return enabled || TERN0(HAS_BED_PROBE, z_probe_enabled);
     }
 
     static inline bool global_enabled() { return enabled_globally; }
@@ -107,7 +108,11 @@ class Endstops {
     /**
      * Get Endstop hit state.
      */
-    FORCE_INLINE static uint8_t trigger_state() { return hit_state; }
+    #if LINEAR_AXES > 3
+      FORCE_INLINE static uint16_t trigger_state() { return hit_state; }
+    #else
+      FORCE_INLINE static uint8_t trigger_state() { return hit_state; }
+    #endif
 
     /**
      * Get current endstops state

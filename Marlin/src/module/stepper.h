@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
 #pragma once
@@ -38,7 +38,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Grbl.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "../inc/MarlinConfig.h"
@@ -150,6 +150,24 @@
 #else
   #define ISR_Z_STEPPER_CYCLES       0UL
 #endif
+#if HAS_I_STEP
+  #define ISR_I_STEPPER_CYCLES       ISR_STEPPER_CYCLES
+#elif LINEAR_AXES >= 4
+  #define ISR_START_I_STEPPER_CYCLES 0UL
+  #define ISR_I_STEPPER_CYCLES       0UL
+#endif
+#if HAS_J_STEP
+  #define ISR_J_STEPPER_CYCLES       ISR_STEPPER_CYCLES
+#elif LINEAR_AXES >= 5
+  #define ISR_START_J_STEPPER_CYCLES 0UL
+  #define ISR_J_STEPPER_CYCLES       0UL
+#endif
+#if HAS_K_STEP
+  #define ISR_K_STEPPER_CYCLES       ISR_STEPPER_CYCLES
+#elif LINEAR_AXES >= 6
+  #define ISR_START_K_STEPPER_CYCLES 0UL
+  #define ISR_K_STEPPER_CYCLES       0UL
+#endif
 
 // E is always interpolated, even for mixing extruders
 #define ISR_E_STEPPER_CYCLES         ISR_STEPPER_CYCLES
@@ -162,7 +180,7 @@
 #endif
 
 // And the total minimum loop time, not including the base
-#define MIN_ISR_LOOP_CYCLES (ISR_X_STEPPER_CYCLES + ISR_Y_STEPPER_CYCLES + ISR_Z_STEPPER_CYCLES + ISR_E_STEPPER_CYCLES + ISR_MIXING_STEPPER_CYCLES)
+#define MIN_ISR_LOOP_CYCLES (ISR_E_STEPPER_CYCLES + ISR_MIXING_STEPPER_CYCLES + GANG_N(LINEAR_AXES, ISR_X_STEPPER_CYCLES, + ISR_Y_STEPPER_CYCLES, + ISR_Z_STEPPER_CYCLES, + ISR_I_STEPPER_CYCLES, + ISR_J_STEPPER_CYCLES, + ISR_K_STEPPER_CYCLES))
 
 // Calculate the minimum MPU cycles needed per pulse to enforce, limited to the max stepper rate
 #define _MIN_STEPPER_PULSE_CYCLES(N) _MAX(uint32_t((F_CPU) / (MAXIMUM_STEPPER_RATE)), ((F_CPU) / 500000UL) * (N))
@@ -190,7 +208,6 @@
 #else
   #error "Expected at least one of MINIMUM_STEPPER_PULSE or MAXIMUM_STEPPER_RATE to be defined"
 #endif
-
 
 // But the user could be enforcing a minimum time, so the loop time is
 #define ISR_LOOP_CYCLES (ISR_LOOP_BASE_CYCLES + _MAX(MIN_STEPPER_PULSE_CYCLES, MIN_ISR_LOOP_CYCLES))
@@ -230,8 +247,10 @@
 #define MAX_STEP_ISR_FREQUENCY_2X   ((F_CPU) / ISR_EXECUTION_CYCLES(2))
 #define MAX_STEP_ISR_FREQUENCY_1X   ((F_CPU) / ISR_EXECUTION_CYCLES(1))
 
-// The minimum allowable frequency for step smoothing will be 1/10 of the maximum nominal frequency (in Hz)
-#define MIN_STEP_ISR_FREQUENCY MAX_STEP_ISR_FREQUENCY_1X
+// The minimum step ISR rate used by ADAPTIVE_STEP_SMOOTHING to target 50% CPU usage
+// This does not account for the possibility of multi-stepping.
+// Perhaps DISABLE_MULTI_STEPPING should be required with ADAPTIVE_STEP_SMOOTHING.
+#define MIN_STEP_ISR_FREQUENCY (MAX_STEP_ISR_FREQUENCY_1X / 2)
 
 //
 // Stepper class definition
@@ -240,7 +259,7 @@ class Stepper {
 
   public:
 
-    #if HAS_EXTRA_ENDSTOPS || ENABLED(Z_STEPPER_AUTO_ALIGN)
+    #if EITHER(HAS_EXTRA_ENDSTOPS, Z_STEPPER_AUTO_ALIGN)
       static bool separate_multi_axis;
     #endif
 
@@ -248,8 +267,15 @@ class Stepper {
       #ifndef PWM_MOTOR_CURRENT
         #define PWM_MOTOR_CURRENT DEFAULT_PWM_MOTOR_CURRENT
       #endif
-      static uint32_t motor_current_setting[3];
+      static uint32_t motor_current_setting[3]; // TODO: longer array if LINEAR_AXES >= 4 ?
       static bool initialized;
+    #endif
+
+    // Last-moved extruder, as set when the last movement was fetched from planner
+    #if HAS_MULTI_EXTRUDER
+      static uint8_t last_moved_extruder;
+    #else
+      static constexpr uint8_t last_moved_extruder = 0;
     #endif
 
   private:
@@ -260,13 +286,6 @@ class Stepper {
                    axis_did_move;           // Last Movement in the given direction is not null, as computed when the last movement was fetched from planner
 
     static bool abort_current_block;        // Signals to the stepper that current block should be aborted
-
-    // Last-moved extruder, as set when the last movement was fetched from planner
-    #if EXTRUDERS < 2
-      static constexpr uint8_t last_moved_extruder = 0;
-    #elif DISABLED(MIXING_EXTRUDER)
-      static uint8_t last_moved_extruder;
-    #endif
 
     #if ENABLED(X_DUAL_ENDSTOPS)
       static bool locked_X_motor, locked_X2_motor;
@@ -303,7 +322,7 @@ class Stepper {
                     decelerate_after,       // The point from where we need to start decelerating
                     step_event_count;       // The total event count for the current block
 
-    #if EXTRUDERS > 1 || ENABLED(MIXING_EXTRUDER)
+    #if EITHER(HAS_MULTI_EXTRUDER, MIXING_EXTRUDER)
       static uint8_t stepper_extruder;
     #else
       static constexpr uint8_t stepper_extruder = 0;
@@ -334,28 +353,44 @@ class Stepper {
       static uint32_t nextBabystepISR;
     #endif
 
+    #if ENABLED(DIRECT_STEPPING)
+      static page_step_state_t page_step_state;
+    #endif
+
     static int32_t ticks_nominal;
     #if DISABLED(S_CURVE_ACCELERATION)
       static uint32_t acc_step_rate; // needed for deceleration start point
     #endif
 
-    //
     // Exact steps at which an endstop was triggered
-    //
     static xyz_long_t endstops_trigsteps;
 
-    //
     // Positions of stepper motors, in step units
-    //
     static xyze_long_t count_position;
 
-    //
-    // Current direction of stepper motors (+1 or -1)
-    //
+    // Current stepper motor directions (+1 or -1)
     static xyze_int8_t count_direction;
 
-  public:
+    #if ENABLED(LASER_POWER_INLINE_TRAPEZOID)
 
+      typedef struct {
+        bool enabled;       // Trapezoid needed flag (i.e., laser on, planner in control)
+        uint8_t cur_power;  // Current laser power
+        bool cruise_set;    // Power set up for cruising?
+
+        #if DISABLED(LASER_POWER_INLINE_TRAPEZOID_CONT)
+          uint32_t last_step_count, // Step count from the last update
+                   acc_step_count;  // Bresenham counter for laser accel/decel
+        #else
+          uint16_t till_update;     // Countdown to the next update
+        #endif
+      } stepper_laser_t;
+
+      static stepper_laser_t laser_trap;
+
+    #endif
+
+  public:
     // Initialize stepper hardware
     static void init();
 
@@ -406,13 +441,29 @@ class Stepper {
     static int32_t position(const AxisEnum axis);
 
     // Set the current position in steps
-    static void set_position(const int32_t &a, const int32_t &b, const int32_t &c, const int32_t &e);
-    static inline void set_position(const xyze_long_t &abce) { set_position(abce.a, abce.b, abce.c, abce.e); }
+    static void set_position(
+      LIST_N(LINEAR_AXES, const int32_t &a, const int32_t &b, const int32_t &c, const int32_t &i, const int32_t &j, const int32_t &k),
+      const int32_t &e
+    );
+    static inline void set_position(const xyze_long_t &abce) {
+      set_position(LIST_N(LINEAR_AXES, abce.a, abce.b, abce.c, abce.i, abce.j, abce.k), abce.e);
+    }
     static void set_axis_position(const AxisEnum a, const int32_t &v);
 
     // Report the positions of the steppers, in steps
     static void report_a_position(const xyz_long_t &pos);
     static void report_positions();
+
+    // Discard current block and free any resources
+    FORCE_INLINE static void discard_current_block() {
+      #if ENABLED(DIRECT_STEPPING)
+        if (IS_PAGE(current_block))
+          page_manager.free_page(current_block->page_idx);
+      #endif
+      current_block = nullptr;
+      axis_did_move = 0;
+      planner.release_current_block();
+    }
 
     // Quickly stop all steppers
     FORCE_INLINE static void quick_stop() { abort_current_block = true; }
@@ -422,15 +473,6 @@ class Stepper {
 
     // The last movement direction was not null on the specified axis. Note that motor direction is not necessarily the same.
     FORCE_INLINE static bool axis_is_moving(const AxisEnum axis) { return TEST(axis_did_move, axis); }
-
-    // The extruder associated to the last movement
-    FORCE_INLINE static uint8_t movement_extruder() {
-      return (0
-        #if EXTRUDERS > 1 && DISABLED(MIXING_EXTRUDER)
-          + last_moved_extruder
-        #endif
-      );
-    }
 
     // Handle a triggered endstop
     static void endstop_triggered(const AxisEnum axis);
@@ -449,7 +491,7 @@ class Stepper {
       static void microstep_readings();
     #endif
 
-    #if HAS_EXTRA_ENDSTOPS || ENABLED(Z_STEPPER_AUTO_ALIGN)
+    #if EITHER(HAS_EXTRA_ENDSTOPS, Z_STEPPER_AUTO_ALIGN)
       FORCE_INLINE static void set_separate_multi_axis(const bool state) { separate_multi_axis = state; }
     #endif
     #if ENABLED(X_DUAL_ENDSTOPS)
@@ -461,7 +503,7 @@ class Stepper {
       FORCE_INLINE static void set_y2_lock(const bool state) { locked_Y2_motor = state; }
     #endif
     #if EITHER(Z_MULTI_ENDSTOPS, Z_STEPPER_AUTO_ALIGN)
-      FORCE_INLINE static void set_z_lock(const bool state) { locked_Z_motor = state; }
+      FORCE_INLINE static void set_z1_lock(const bool state) { locked_Z_motor = state; }
       FORCE_INLINE static void set_z2_lock(const bool state) { locked_Z2_motor = state; }
       #if NUM_Z_STEPPER_DRIVERS >= 3
         FORCE_INLINE static void set_z3_lock(const bool state) { locked_Z3_motor = state; }
@@ -469,6 +511,16 @@ class Stepper {
           FORCE_INLINE static void set_z4_lock(const bool state) { locked_Z4_motor = state; }
         #endif
       #endif
+      static inline void set_all_z_lock(const bool lock, const int8_t except=-1) {
+        set_z1_lock(lock ^ (except == 0));
+        set_z2_lock(lock ^ (except == 1));
+        #if NUM_Z_STEPPER_DRIVERS >= 3
+          set_z3_lock(lock ^ (except == 2));
+          #if NUM_Z_STEPPER_DRIVERS >= 4
+            set_z4_lock(lock ^ (except == 3));
+          #endif
+        #endif
+      }
     #endif
 
     #if ENABLED(BABYSTEPPING)
@@ -485,8 +537,13 @@ class Stepper {
   private:
 
     // Set the current position in steps
-    static void _set_position(const int32_t &a, const int32_t &b, const int32_t &c, const int32_t &e);
-    FORCE_INLINE static void _set_position(const abce_long_t &spos) { _set_position(spos.a, spos.b, spos.c, spos.e); }
+    static void _set_position(
+      LIST_N(LINEAR_AXES, const int32_t &a, const int32_t &b, const int32_t &c, const int32_t &i, const int32_t &j, const int32_t &k),
+      const int32_t &e
+    );
+    FORCE_INLINE static void _set_position(const abce_long_t &spos) {
+      _set_position(LIST_N(LINEAR_AXES, spos.a, spos.b, spos.c, spos.i, spos.j, spos.k), spos.e);
+    }
 
     FORCE_INLINE static uint32_t calc_timer_interval(uint32_t step_rate, uint8_t* loops) {
       uint32_t timer;
@@ -511,7 +568,7 @@ class Stepper {
 
         // Select the proper multistepping
         uint8_t idx = 0;
-        while (idx < 7 && step_rate > (uint32_t)pgm_read_dword(&limit[idx])) {
+        while (idx < 4 && step_rate > (uint32_t)pgm_read_dword(&limit[idx])) {
           step_rate >>= 1;
           multistep <<= 1;
           ++idx;
@@ -525,7 +582,7 @@ class Stepper {
         // In case of high-performance processor, it is able to calculate in real-time
         timer = uint32_t(STEPPER_TIMER_RATE) / step_rate;
       #else
-        constexpr uint32_t min_step_rate = F_CPU / 500000U;
+        constexpr uint32_t min_step_rate = (F_CPU) / 500000U;
         NOLESS(step_rate, min_step_rate);
         step_rate -= min_step_rate; // Correct for minimal speed
         if (step_rate >= (8 * 256)) { // higher step rate

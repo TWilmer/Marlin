@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
 
@@ -51,7 +51,6 @@
   #undef CALIBRATION_MEASURE_AT_TOP_EDGES
 #endif
 
-
 /**
  * G425 backs away from the calibration object by various distances
  * depending on the confidence level:
@@ -77,8 +76,20 @@
 #if BOTH(CALIBRATION_MEASURE_FRONT, CALIBRATION_MEASURE_BACK)
   #define HAS_Y_CENTER 1
 #endif
+#if LINEAR_AXES >= 4 && BOTH(CALIBRATION_MEASURE_IMIN, CALIBRATION_MEASURE_IMAX)
+  #define HAS_I_CENTER 1
+#endif
+#if LINEAR_AXES >= 5 && BOTH(CALIBRATION_MEASURE_JMIN, CALIBRATION_MEASURE_JMAX)
+  #define HAS_J_CENTER 1
+#endif
+#if LINEAR_AXES >= 6 && BOTH(CALIBRATION_MEASURE_KMIN, CALIBRATION_MEASURE_KMAX)
+  #define HAS_K_CENTER 1
+#endif
 
-enum side_t : uint8_t { TOP, RIGHT, FRONT, LEFT, BACK, NUM_SIDES };
+enum side_t : uint8_t {
+  TOP, RIGHT, FRONT, LEFT, BACK, NUM_SIDES,
+  LIST_N(DOUBLE(SUB3(LINEAR_AXES)), IMINIMUM, IMAXIMUM, JMINIMUM, JMAXIMUM, KMINIMUM, KMAXIMUM)
+};
 
 static constexpr xyz_pos_t true_center CALIBRATION_OBJECT_CENTER;
 static constexpr xyz_float_t dimensions CALIBRATION_OBJECT_DIMENSIONS;
@@ -92,8 +103,6 @@ struct measurements_t {
 
   xy_float_t nozzle_outer_dimension = nod;
 };
-
-#define TEMPORARY_SOFT_ENDSTOP_STATE(enable) REMEMBER(tes, soft_endstops_enabled, enable);
 
 #if ENABLED(BACKLASH_GCODE)
   #define TEMPORARY_BACKLASH_CORRECTION(value) REMEMBER(tbst, backlash.correction, value)
@@ -127,7 +136,7 @@ inline void park_above_object(measurements_t &m, const float uncertainty) {
   calibration_move();
 }
 
-#if HOTENDS > 1
+#if HAS_MULTI_HOTEND
   inline void set_nozzle(measurements_t &m, const uint8_t extruder) {
     if (extruder != active_extruder) {
       park_above_object(m, CALIBRATION_MEASUREMENT_UNKNOWN);
@@ -236,12 +245,24 @@ inline void probe_side(measurements_t &m, const float uncertainty, const side_t 
       }
     #endif
     #if AXIS_CAN_CALIBRATE(X)
+      case RIGHT: dir = -1;
       case LEFT:  axis = X_AXIS; break;
-      case RIGHT: axis = X_AXIS; dir = -1; break;
     #endif
     #if AXIS_CAN_CALIBRATE(Y)
+      case BACK:  dir = -1;
       case FRONT: axis = Y_AXIS; break;
-      case BACK:  axis = Y_AXIS; dir = -1; break;
+    #endif
+    #if LINEAR_AXES >= 4
+      case IMINIMUM: dir = -1;
+      case IMAXIMUM: axis = I_AXIS; break;
+    #endif
+    #if LINEAR_AXES >= 5
+      case JMINIMUM: dir = -1;
+      case JMAXIMUM: axis = J_AXIS; break;
+    #endif
+    #if LINEAR_AXES >= 6
+      case KMINIMUM: dir = -1;
+      case KMAXIMUM: axis = K_AXIS; break;
     #endif
     default: return;
   }
@@ -256,7 +277,7 @@ inline void probe_side(measurements_t &m, const float uncertainty, const side_t 
     #endif
   }
 
-  if (AXIS_CAN_CALIBRATE(X) && axis == X_AXIS || AXIS_CAN_CALIBRATE(Y) && axis == Y_AXIS) {
+  if ((AXIS_CAN_CALIBRATE(X) && axis == X_AXIS) || (AXIS_CAN_CALIBRATE(Y) && axis == Y_AXIS)) {
     // Move to safe distance to the side of the calibration object
     current_position[axis] = m.obj_center[axis] + (-dir) * (dimensions[axis] / 2 + m.nozzle_outer_dimension[axis] / 2 + uncertainty);
     calibration_move();
@@ -286,53 +307,45 @@ inline void probe_sides(measurements_t &m, const float uncertainty) {
     probe_side(m, uncertainty, TOP);
   #endif
 
-  #if ENABLED(CALIBRATION_MEASURE_RIGHT)
-    probe_side(m, uncertainty, RIGHT, probe_top_at_edge);
-  #endif
-
-  #if ENABLED(CALIBRATION_MEASURE_FRONT)
-    probe_side(m, uncertainty, FRONT, probe_top_at_edge);
-  #endif
-
-  #if ENABLED(CALIBRATION_MEASURE_LEFT)
-    probe_side(m, uncertainty, LEFT,  probe_top_at_edge);
-  #endif
-  #if ENABLED(CALIBRATION_MEASURE_BACK)
-    probe_side(m, uncertainty, BACK,  probe_top_at_edge);
-  #endif
+  TERN_(CALIBRATION_MEASURE_RIGHT, probe_side(m, uncertainty, RIGHT, probe_top_at_edge));
+  TERN_(CALIBRATION_MEASURE_FRONT, probe_side(m, uncertainty, FRONT, probe_top_at_edge));
+  TERN_(CALIBRATION_MEASURE_LEFT,  probe_side(m, uncertainty, LEFT,  probe_top_at_edge));
+  TERN_(CALIBRATION_MEASURE_BACK,  probe_side(m, uncertainty, BACK,  probe_top_at_edge));
+  TERN_(CALIBRATION_MEASURE_IMIN,  probe_side(m, uncertainty, IMINIMUM,  probe_top_at_edge));
+  TERN_(CALIBRATION_MEASURE_IMAX,  probe_side(m, uncertainty, IMAXIMUM,  probe_top_at_edge));
+  TERN_(CALIBRATION_MEASURE_JMIN,  probe_side(m, uncertainty, JMINIMUM,  probe_top_at_edge));
+  TERN_(CALIBRATION_MEASURE_JMAX,  probe_side(m, uncertainty, JMAXIMUM,  probe_top_at_edge));
+  TERN_(CALIBRATION_MEASURE_KMIN,  probe_side(m, uncertainty, KMINIMUM,  probe_top_at_edge));
+  TERN_(CALIBRATION_MEASURE_KMAX,  probe_side(m, uncertainty, KMAXIMUM,  probe_top_at_edge));
 
   // Compute the measured center of the calibration object.
-  #if HAS_X_CENTER
-    m.obj_center.x = (m.obj_side[LEFT] + m.obj_side[RIGHT]) / 2;
-  #endif
-  #if HAS_Y_CENTER
-    m.obj_center.y = (m.obj_side[FRONT] + m.obj_side[BACK]) / 2;
-  #endif
+  TERN_(HAS_X_CENTER, m.obj_center.x = (m.obj_side[LEFT] + m.obj_side[RIGHT]) / 2);
+  TERN_(HAS_Y_CENTER, m.obj_center.y = (m.obj_side[FRONT] + m.obj_side[BACK]) / 2);
+  TERN_(HAS_I_CENTER, m.obj_center.i = (m.obj_side[IMINIMUM] + m.obj_side[IMAXIMUM]) / 2);
+  TERN_(HAS_J_CENTER, m.obj_center.j = (m.obj_side[JMINIMUM] + m.obj_side[JMAXIMUM]) / 2);
+  TERN_(HAS_K_CENTER, m.obj_center.k = (m.obj_side[KMINIMUM] + m.obj_side[KMAXIMUM]) / 2);
 
   // Compute the outside diameter of the nozzle at the height
   // at which it makes contact with the calibration object
-  #if HAS_X_CENTER
-    m.nozzle_outer_dimension.x = m.obj_side[RIGHT] - m.obj_side[LEFT] - dimensions.x;
-  #endif
-  #if HAS_Y_CENTER
-    m.nozzle_outer_dimension.y = m.obj_side[BACK]  - m.obj_side[FRONT] - dimensions.y;
-  #endif
+  TERN_(HAS_X_CENTER, m.nozzle_outer_dimension.x = m.obj_side[RIGHT] - m.obj_side[LEFT] - dimensions.x);
+  TERN_(HAS_Y_CENTER, m.nozzle_outer_dimension.y = m.obj_side[BACK]  - m.obj_side[FRONT] - dimensions.y);
 
   park_above_object(m, uncertainty);
 
   // The difference between the known and the measured location
   // of the calibration object is the positional error
-  m.pos_error.x = (0
-    #if HAS_X_CENTER
-      + true_center.x - m.obj_center.x
-    #endif
-  );
-  m.pos_error.y = (0
-    #if HAS_Y_CENTER
-      + true_center.y - m.obj_center.y
-    #endif
-  );
+  m.pos_error.x = TERN0(HAS_X_CENTER, true_center.x - m.obj_center.x)
+  m.pos_error.y = TERN0(HAS_Y_CENTER, true_center.y - m.obj_center.y)
   m.pos_error.z = true_center.z - m.obj_center.z;
+  #if LINEAR_AXES >= 4
+    m.pos_error.i = TERN0(HAS_I_CENTER, true_center.i - m.obj_center.i)
+  #endif
+  #if LINEAR_AXES >= 5
+    m.pos_error.j = TERN0(HAS_J_CENTER, true_center.j - m.obj_center.j)
+  #endif
+  #if LINEAR_AXES >= 6
+    m.pos_error.k = TERN0(HAS_K_CENTER, true_center.k - m.obj_center.k)
+  #endif
 }
 
 #if ENABLED(CALIBRATION_REPORTING)
@@ -353,6 +366,29 @@ inline void probe_sides(measurements_t &m, const float uncertainty) {
     #if ENABLED(CALIBRATION_MEASURE_BACK)
       SERIAL_ECHOLNPAIR("  Back: ", m.obj_side[BACK]);
     #endif
+    #if LINEAR_AXES >= 4
+      #if ENABLED(CALIBRATION_MEASURE_IMIN)
+        SERIAL_ECHOLNPAIR("  Imin: ", m.obj_side[IMINIMUM]);
+      #endif
+      #if ENABLED(CALIBRATION_MEASURE_IMAX)
+        SERIAL_ECHOLNPAIR("  Imax: ", m.obj_side[IMAXIMUM]);
+      #endif
+    #endif
+    #if LINEAR_AXES >= 5
+      #if ENABLED(CALIBRATION_MEASURE_JMIN)
+        SERIAL_ECHOLNPAIR("  Jmin: ", m.obj_side[JMINIMUM]);
+      #endif
+      #if ENABLED(CALIBRATION_MEASURE_JMAX)
+        SERIAL_ECHOLNPAIR("  Jmax: ", m.obj_side[JMAXIMUM]);
+      #endif
+    #endif
+    #if LINEAR_AXES >= 6
+      #if ENABLED(CALIBRATION_MEASURE_KMIN)
+        SERIAL_ECHOLNPAIR("  Kmin: ", m.obj_side[KMINIMUM]);
+      #endif
+      #if ENABLED(CALIBRATION_MEASURE_KMAX)
+        SERIAL_ECHOLNPAIR("  Kmax: ", m.obj_side[KMAXIMUM]);
+      #endif
     SERIAL_EOL();
   }
 
@@ -365,6 +401,15 @@ inline void probe_sides(measurements_t &m, const float uncertainty) {
       SERIAL_ECHOLNPAIR_P(SP_Y_STR, m.obj_center.y);
     #endif
     SERIAL_ECHOLNPAIR_P(SP_Z_STR, m.obj_center.z);
+    #if HAS_I_CENTER
+      SERIAL_ECHOLNPAIR_P(SP_I_STR, m.obj_center.i);
+    #endif
+    #if HAS_J_CENTER
+      SERIAL_ECHOLNPAIR_P(SP_J_STR, m.obj_center.j);
+    #endif
+    #if HAS_K_CENTER
+      SERIAL_ECHOLNPAIR_P(SP_K_STR, m.obj_center.k);
+    #endif
     SERIAL_EOL();
   }
 
@@ -388,6 +433,30 @@ inline void probe_sides(measurements_t &m, const float uncertainty) {
     #endif
     #if AXIS_CAN_CALIBRATE(Z)
       SERIAL_ECHOLNPAIR("  Top: ", m.backlash[TOP]);
+    #endif
+    #if LINEAR_AXES >= 4
+      #if ENABLED(CALIBRATION_MEASURE_IMIN)
+        SERIAL_ECHOLNPAIR("  Imin: ", m.backlash[IMINIMUM]);
+      #endif
+      #if ENABLED(CALIBRATION_MEASURE_IMAX)
+        SERIAL_ECHOLNPAIR("  Imax: ", m.backlash[IMAXIMUM]);
+      #endif
+    #endif
+    #if LINEAR_AXES >= 5
+      #if ENABLED(CALIBRATION_MEASURE_JMIN)
+        SERIAL_ECHOLNPAIR("  Jmin: ", m.backlash[JMINIMUM]);
+      #endif
+      #if ENABLED(CALIBRATION_MEASURE_JMAX)
+        SERIAL_ECHOLNPAIR("  Jmax: ", m.backlash[JMAXIMUM]);
+      #endif
+    #endif
+    #if LINEAR_AXES >= 6
+      #if ENABLED(CALIBRATION_MEASURE_KMIN)
+        SERIAL_ECHOLNPAIR("  Kmin: ", m.backlash[KMINIMUM]);
+      #endif
+      #if ENABLED(CALIBRATION_MEASURE_KMAX)
+        SERIAL_ECHOLNPAIR("  Kmax: ", m.backlash[KMAXIMUM]);
+      #endif
     #endif
     SERIAL_EOL();
   }
@@ -468,7 +537,32 @@ inline void calibrate_backlash(measurements_t &m, const float uncertainty) {
       #endif
 
       if (AXIS_CAN_CALIBRATE(Z)) backlash.distance_mm.z = m.backlash[TOP];
-    #endif
+
+      #if HAS_I_CENTER
+        backlash.distance_mm.i = (m.backlash[IMINIMUM] + m.backlash[IMAXIMUM]) / 2;
+      #elif ENABLED(CALIBRATION_MEASURE_IMIN)
+        backlash.distance_mm.i = m.backlash[IMINIMUM];
+      #elif ENABLED(CALIBRATION_MEASURE_IMAX)
+        backlash.distance_mm.i = m.backlash[IMAXIMUM];
+      #endif
+
+      #if HAS_J_CENTER
+        backlash.distance_mm.j = (m.backlash[JMINIMUM] + m.backlash[JMAXIMUM]) / 2;
+      #elif ENABLED(CALIBRATION_MEASURE_JMIN)
+        backlash.distance_mm.j = m.backlash[JMINIMUM];
+      #elif ENABLED(CALIBRATION_MEASURE_JMAX)
+        backlash.distance_mm.j = m.backlash[JMAXIMUM];
+      #endif
+
+      #if HAS_K_CENTER
+        backlash.distance_mm.k = (m.backlash[KMINIMUM] + m.backlash[KMAXIMUM]) / 2;
+      #elif ENABLED(CALIBRATION_MEASURE_KMIN)
+        backlash.distance_mm.k = m.backlash[KMINIMUM];
+      #elif ENABLED(CALIBRATION_MEASURE_KMAX)
+        backlash.distance_mm.k = m.backlash[KMAXIMUM];
+      #endif
+
+    #endif // BACKLASH_GCODE
   }
 
   #if ENABLED(BACKLASH_GCODE)
@@ -478,7 +572,10 @@ inline void calibrate_backlash(measurements_t &m, const float uncertainty) {
       // New scope for TEMPORARY_BACKLASH_CORRECTION
       TEMPORARY_BACKLASH_CORRECTION(all_on);
       TEMPORARY_BACKLASH_SMOOTHING(0.0f);
-      const xyz_float_t move = { AXIS_CAN_CALIBRATE(X) * 3, AXIS_CAN_CALIBRATE(Y) * 3, AXIS_CAN_CALIBRATE(Z) * 3 };
+      const xyz_float_t move = ARRAY_N(LINEAR_AXES,
+        AXIS_CAN_CALIBRATE(X) * 3, AXIS_CAN_CALIBRATE(Y) * 3, AXIS_CAN_CALIBRATE(Z) * 3,
+        AXIS_CAN_CALIBRATE(I) * 3, AXIS_CAN_CALIBRATE(J) * 3, AXIS_CAN_CALIBRATE(K) * 3
+      );
       current_position += move; calibration_move();
       current_position -= move; calibration_move();
     }
@@ -506,7 +603,7 @@ inline void calibrate_toolhead(measurements_t &m, const float uncertainty, const
   TEMPORARY_BACKLASH_CORRECTION(all_on);
   TEMPORARY_BACKLASH_SMOOTHING(0.0f);
 
-  #if HOTENDS > 1
+  #if HAS_MULTI_HOTEND
     set_nozzle(m, extruder);
   #else
     UNUSED(extruder);
@@ -529,6 +626,10 @@ inline void calibrate_toolhead(measurements_t &m, const float uncertainty, const
   if (ENABLED(HAS_Y_CENTER) && AXIS_CAN_CALIBRATE(Y)) update_measurements(m, Y_AXIS);
                            if (AXIS_CAN_CALIBRATE(Z)) update_measurements(m, Z_AXIS);
 
+  TERN_(HAS_I_CENTER, update_measurements(m, I_AXIS));
+  TERN_(HAS_J_CENTER, update_measurements(m, J_AXIS));
+  TERN_(HAS_K_CENTER, update_measurements(m, K_AXIS));
+
   sync_plan_position();
 }
 
@@ -545,13 +646,9 @@ inline void calibrate_all_toolheads(measurements_t &m, const float uncertainty) 
 
   HOTEND_LOOP() calibrate_toolhead(m, uncertainty, e);
 
-  #if HAS_HOTEND_OFFSET
-    normalize_hotend_offsets();
-  #endif
+  TERN_(HAS_HOTEND_OFFSET, normalize_hotend_offsets());
 
-  #if HOTENDS > 1
-    set_nozzle(m, 0);
-  #endif
+  TERN_(HAS_MULTI_HOTEND, set_nozzle(m, 0));
 }
 
 /**
@@ -568,9 +665,7 @@ inline void calibrate_all_toolheads(measurements_t &m, const float uncertainty) 
 inline void calibrate_all() {
   measurements_t m;
 
-  #if HAS_HOTEND_OFFSET
-    reset_hotend_offsets();
-  #endif
+  TERN_(HAS_HOTEND_OFFSET, reset_hotend_offsets());
 
   TEMPORARY_BACKLASH_CORRECTION(all_on);
   TEMPORARY_BACKLASH_SMOOTHING(0.0f);
@@ -578,12 +673,10 @@ inline void calibrate_all() {
   // Do a fast and rough calibration of the toolheads
   calibrate_all_toolheads(m, CALIBRATION_MEASUREMENT_UNKNOWN);
 
-  #if ENABLED(BACKLASH_GCODE)
-    calibrate_backlash(m, CALIBRATION_MEASUREMENT_UNCERTAIN);
-  #endif
+  TERN_(BACKLASH_GCODE, calibrate_backlash(m, CALIBRATION_MEASUREMENT_UNCERTAIN));
 
   // Cycle the toolheads so the servos settle into their "natural" positions
-  #if HOTENDS > 1
+  #if HAS_MULTI_HOTEND
     HOTEND_LOOP() set_nozzle(m, e);
   #endif
 
@@ -605,10 +698,15 @@ inline void calibrate_all() {
  *   no args     - Perform entire calibration sequence (backlash + position on all toolheads)
  */
 void GcodeSuite::G425() {
+
+  #ifdef CALIBRATION_SCRIPT_PRE
+    GcodeSuite::process_subcommands_now_P(PSTR(CALIBRATION_SCRIPT_PRE));
+  #endif
+
   TEMPORARY_SOFT_ENDSTOP_STATE(false);
   TEMPORARY_BED_LEVELING_STATE(false);
 
-  if (axis_unhomed_error()) return;
+  if (homing_needed_error()) return;
 
   measurements_t m;
 
@@ -635,6 +733,10 @@ void GcodeSuite::G425() {
   #endif
   else
     calibrate_all();
+
+  #ifdef CALIBRATION_SCRIPT_POST
+    GcodeSuite::process_subcommands_now_P(PSTR(CALIBRATION_SCRIPT_POST));
+  #endif
 }
 
 #endif // CALIBRATION_GCODE
