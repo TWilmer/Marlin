@@ -104,6 +104,14 @@
   #define K_MAX_LENGTH (K_MAX_POS - (K_MIN_POS))
 #endif
 
+#if LINEAR_AXES >= 7
+  #define L_MAX_LENGTH (L_MAX_POS - (L_MIN_POS))
+#endif
+
+#if LINEAR_AXES >= 8
+  #define M_MAX_LENGTH (M_MAX_POS - (M_MIN_POS))
+#endif
+
 // Defined only if the sanity-check is bypassed
 #ifndef X_BED_SIZE
   #define X_BED_SIZE X_MAX_LENGTH
@@ -297,7 +305,21 @@
     #define K_HOME_POS (K_HOME_DIR < 0 ? K_MIN_POS : K_MAX_POS)
   #endif
 #endif
+#if LINEAR_AXES >= 7
+  #ifdef MANUAL_L_HOME_POS
+    #define L_HOME_POS MANUAL_L_HOME_POS
+  #else
+    #define L_HOME_POS (L_HOME_DIR < 0 ? L_MIN_POS : L_MAX_POS)
+  #endif
+#endif
 
+#if LINEAR_AXES >= 8
+  #ifdef MANUAL_M_HOME_POS
+    #define M_HOME_POS MANUAL_M_HOME_POS
+  #else
+    #define M_HOME_POS (M_HOME_DIR < 0 ? M_MIN_POS : M_MAX_POS)
+  #endif
+#endif
 /**
  * If DELTA_HEIGHT isn't defined use the old setting
  */
@@ -494,6 +516,14 @@
 #endif
 #if LINEAR_AXES >= 6 && !defined(DISABLE_INACTIVE_K)
   #define DISABLE_INACTIVE_K DISABLE_K
+#endif
+
+#if LINEAR_AXES >= 7 && !defined(DISABLE_INACTIVE_L)
+  #define DISABLE_INACTIVE_L DISABLE_L
+#endif
+
+#if LINEAR_AXES >= 8 && !defined(DISABLE_INACTIVE_M)
+  #define DISABLE_INACTIVE_M DISABLE_M
 #endif
 
 /**
@@ -1408,6 +1438,12 @@
   #if ENABLED(USE_KMIN_PLUG)
     #define ENDSTOPPULLUP_KMIN
   #endif
+  #if ENABLED(USE_LMIN_PLUG)
+    #define ENDSTOPPULLUP_LMIN
+  #endif
+    #if ENABLED(USE_MMIN_PLUG)
+    #define ENDSTOPPULLUP_MMIN
+  #endif
 #endif
 
 /**
@@ -1585,6 +1621,37 @@
   #endif
   #if PIN_EXISTS(K_MS1)
     #define HAS_K_MS_PINS 1
+  #endif
+#endif
+
+
+#if LINEAR_AXES >= 7
+  #if PIN_EXISTS(L_ENABLE) || (ENABLED(SOFTWARE_DRIVER_ENABLE) && AXIS_IS_TMC(L))
+    #define HAS_L_ENABLE 1
+  #endif
+  #if PIN_EXISTS(L_DIR)
+    #define HAS_L_DIR 1
+  #endif
+  #if PIN_EXISTS(L_STEP)
+    #define HAS_L_STEP 1
+  #endif
+  #if PIN_EXISTS(L_MS1)
+    #define HAS_L_MS_PINS 1
+  #endif
+#endif
+
+#if LINEAR_AXES >= 8
+  #if PIN_EXISTS(M_ENABLE) || (ENABLED(SOFTWARE_DRIVER_ENABLE) && AXIS_IS_TMC(M))
+    #define HAS_M_ENABLE 1
+  #endif
+  #if PIN_EXISTS(M_DIR)
+    #define HAS_M_DIR 1
+  #endif
+  #if PIN_EXISTS(M_STEP)
+    #define HAS_M_STEP 1
+  #endif
+  #if PIN_EXISTS(M_MS1)
+    #define HAS_M_MS_PINS 1
   #endif
 #endif
 
@@ -1866,6 +1933,12 @@
 #endif
 #if _HAS_STOP(K,MAX)
   #define HAS_K_MAX 1
+#endif
+#if _HAS_STOP(L,MAX)
+  #define HAS_L_MAX 1
+#endif
+#if _HAS_STOP(M,MAX)
+  #define HAS_M_MAX 1
 #endif
 #if HAS_CUSTOM_PROBE_PIN && PIN_EXISTS(Z_MIN_PROBE)
   #define HAS_Z_MIN_PROBE_PIN 1

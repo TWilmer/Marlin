@@ -145,7 +145,7 @@
 
 // Choose the name from boards.h that matches your setup
 #ifndef MOTHERBOARD
-  #define MOTHERBOARD BOARD_BTT_SKR_V1_3
+  #define MOTHERBOARD BOARD_BTT_SKR_V1_3_MOTV1
 #endif
 
 // Name displayed in the LCD "Ready" message and Info menu
@@ -169,7 +169,7 @@
  * See https://github.com/DerAndere1/Marlin/wiki
  * :[3, 4, 5, 6]
  */
-#define LINEAR_AXES 5
+#define LINEAR_AXES 8
 
 /**
  * Axis codes for additional axes:
@@ -194,7 +194,15 @@
   #define AXIS5_NAME 'B' // :['J', 'A', 'B', 'C', 'U', 'V', 'W']
 #endif
 #if LINEAR_AXES >= 6
-  #define AXIS6_NAME 'K' // :['K', 'A', 'B', 'C', 'U', 'V', 'W']
+  #define AXIS6_NAME 'U' // :['K', 'A', 'B', 'C', 'U', 'V', 'W']
+#endif
+
+#if LINEAR_AXES >= 7
+  #define AXIS7_NAME 'V' // :['K', 'A', 'B', 'C', 'U', 'V', 'W']
+#endif
+
+#if LINEAR_AXES >= 8
+  #define AXIS8_NAME 'W' // :['K', 'A', 'B', 'C', 'U', 'V', 'W']
 #endif
 
 // @section extruder
@@ -722,12 +730,16 @@
 #define I_MIN_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
 #define J_MIN_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
 #define K_MIN_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
+#define L_MIN_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
+#define M_MIN_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
 #define X_MAX_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
 #define Y_MAX_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
 #define Z_MAX_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
 #define I_MAX_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
 #define J_MAX_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
 #define K_MAX_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
+#define L_MAX_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
+#define M_MAX_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
 #define Z_MIN_PROBE_ENDSTOP_INVERTING false // Set to true to invert the logic of the probe.
 
 /**
@@ -756,6 +768,10 @@
 //#define Z4_DRIVER_TYPE A4988
 #define I_DRIVER_TYPE TMC2209
 #define J_DRIVER_TYPE TMC2209
+#define K_DRIVER_TYPE TMC2209
+#define L_DRIVER_TYPE TMC2209
+#define M_DRIVER_TYPE TMC2209
+
 //#define E2_DRIVER_TYPE A4988
 //#define E3_DRIVER_TYPE A4988
 //#define E4_DRIVER_TYPE A4988
@@ -809,7 +825,7 @@
  * Override with M92
  *                                      X, Y, Z, [I ,[J ,[K ,]]] E0 [, E1[, E2...]]
  */ 
-#define DEFAULT_AXIS_STEPS_PER_UNIT     {LIST_N(LINEAR_AXES, 800, 800, 84, 71.1111111111, 71.1111111111)} 
+#define DEFAULT_AXIS_STEPS_PER_UNIT     {LIST_N(LINEAR_AXES, 800, 800, 84, 71.1111111111, 71.1111111111,800,800,800)} 
 //#define DEFAULT_AXIS_STEPS_PER_UNIT     {LIST_N(LINEAR_AXES, 100, 100, 100, 100, 17.777)}
 
 /**
@@ -817,12 +833,12 @@
  * Override with M203
  *                                      X, Y, Z, [I ,[J ,[K ,]]] E0 [, E1[, E2...]]
  */
- #define DEFAULT_MAX_FEEDRATE          {LIST_N(LINEAR_AXES, 5000, 5000, 10, 100, 100) }  
+ #define DEFAULT_MAX_FEEDRATE          {LIST_N(LINEAR_AXES, 5000, 5000, 10, 100, 100,800,800,800) }  
 //#define DEFAULT_MAX_FEEDRATE          {LIST_N(LINEAR_AXES, 5000, 5000, 5000, 5000, 100) }
 
 //#define LIMITED_MAX_FR_EDITING        // Limit edit via M203 or LCD to DEFAULT_MAX_FEEDRATE * 2
 #if ENABLED(LIMITED_MAX_FR_EDITING)
-  #define MAX_FEEDRATE_EDIT_VALUES    {LIST_N(LINEAR_AXES, 5000, 5000, 5000, 5000, 5000) } // ...or, set your own edit limits
+  #define MAX_FEEDRATE_EDIT_VALUES    {LIST_N(LINEAR_AXES, 5000, 5000, 5000, 5000, 5000,5000,5000,5000) } // ...or, set your own edit limits
 #endif
 
 /**
@@ -831,11 +847,11 @@
  * Override with M201
  *                                      X, Y, Z, [I ,[J ,[K ,]]] E0 [, E1[, E2...]]
  */
-#define DEFAULT_MAX_ACCELERATION      {LIST_N(LINEAR_AXES, 30000, 30000, 30000, 30000, 30000) }
+#define DEFAULT_MAX_ACCELERATION      {LIST_N(LINEAR_AXES, 30000, 30000, 30000, 30000, 30000,30000,30000,30000) }
 
 //#define LIMITED_MAX_ACCEL_EDITING     // Limit edit via M201 or LCD to DEFAULT_MAX_ACCELERATION * 2
 #if ENABLED(LIMITED_MAX_ACCEL_EDITING)
-  #define MAX_ACCEL_EDIT_VALUES       {LIST_N(LINEAR_AXES, 30000, 30000, 30000, 30000, 30000) } // ...or, set your own edit limits
+  #define MAX_ACCEL_EDIT_VALUES       {LIST_N(LINEAR_AXES, 30000, 30000, 30000, 30000, 30000,30000,30000,30000) } // ...or, set your own edit limits
 #endif
 
 /**
@@ -1127,6 +1143,9 @@
 #define I_ENABLE_ON 0
 #define J_ENABLE_ON 0
 #define K_ENABLE_ON 0
+#define L_ENABLE_ON 0
+#define M_ENABLE_ON 0
+
 
 // Disables axis stepper immediately when it's not being used.
 // WARNING: When motors turn off there is a chance of losing position accuracy!
@@ -1136,6 +1155,8 @@
 #define DISABLE_I false
 #define DISABLE_J false
 #define DISABLE_K false
+#define DISABLE_L false
+#define DISABLE_M false
 
 // Warn on display about possibly reduced accuracy
 //#define DISABLE_REDUCED_ACCURACY_WARNING
@@ -1154,6 +1175,8 @@
 #define INVERT_I_DIR false
 #define INVERT_J_DIR false
 #define INVERT_K_DIR false
+#define INVERT_L_DIR false
+#define INVERT_M_DIR false
 
 // @section extruder
 
@@ -1186,6 +1209,8 @@
 #define I_HOME_DIR -1
 #define J_HOME_DIR -1
 #define K_HOME_DIR -1
+#define L_HOME_DIR -1
+#define M_HOME_DIR -1
 
 // @section machine
 
@@ -1206,6 +1231,11 @@
 #define J_MAX_POS 6000
 #define K_MIN_POS 0
 #define K_MAX_POS 6000
+#define L_MIN_POS 0
+#define L_MAX_POS 6000
+#define M_MIN_POS 0
+#define M_MAX_POS 6000
+
 
 /**
  * Software Endstops
@@ -1478,6 +1508,9 @@
 #define HOMING_FEEDRATE_Z  (4*60)
 #define HOMING_FEEDRATE_I  0
 #define HOMING_FEEDRATE_J  0
+#define HOMING_FEEDRATE_K  (25*60)
+#define HOMING_FEEDRATE_L  0
+#define HOMING_FEEDRATE_M  0
 
 // Validate that endstops are triggered on homing moves
 //#define VALIDATE_HOMING_ENDSTOPS

@@ -179,6 +179,18 @@ extern uint8_t marlin_debug_flags;
 #define _SEP_22_P(a,b,V...) do{ _SEP_2_P(a,b); _SEP_20_P(V); }while(0)
 #define _SEP_23_P(a,b,V...) do{ _SEP_2_P(a,b); _SEP_21_P(V); }while(0)
 #define _SEP_24_P(a,b,V...) do{ _SEP_2_P(a,b); _SEP_22_P(V); }while(0)
+#define _SEP_25_P(a,b,V...) do{ _SEP_2_P(a,b); _SEP_23_P(V); }while(0)
+#define _SEP_26_P(a,b,V...) do{ _SEP_2_P(a,b); _SEP_24_P(V); }while(0)
+#define _SEP_27_P(a,b,V...) do{ _SEP_2_P(a,b); _SEP_25_P(V); }while(0)
+#define _SEP_28_P(a,b,V...) do{ _SEP_2_P(a,b); _SEP_26_P(V); }while(0)
+#define _SEP_29_P(a,b,V...) do{ _SEP_2_P(a,b); _SEP_27_P(V); }while(0)
+#define _SEP_30_P(a,b,V...) do{ _SEP_2_P(a,b); _SEP_28_P(V); }while(0)
+#define _SEP_31_P(a,b,V...) do{ _SEP_2_P(a,b); _SEP_29_P(V); }while(0)
+#define _SEP_32_P(a,b,V...) do{ _SEP_2_P(a,b); _SEP_30_P(V); }while(0)
+#define _SEP_33_P(a,b,V...) do{ _SEP_2_P(a,b); _SEP_31_P(V); }while(0)
+#define _SEP_34_P(a,b,V...) do{ _SEP_2_P(a,b); _SEP_32_P(V); }while(0)
+#define _SEP_35_P(a,b,V...) do{ _SEP_2_P(a,b); _SEP_33_P(V); }while(0)
+
 
 #define SERIAL_ECHOPAIR_P(V...) _SEP_N_P(NUM_ARGS(V),V)
 
@@ -214,7 +226,13 @@ extern uint8_t marlin_debug_flags;
 #define _SELP_27(a,b,V...) do{ _SEP_2(a,b); _SELP_25(V); }while(0)
 #define _SELP_28(a,b,V...) do{ _SEP_2(a,b); _SELP_26(V); }while(0)
 #define _SELP_29(a,b,V...) do{ _SEP_2(a,b); _SELP_27(V); }while(0)
-#define _SELP_30(a,b,V...) do{ _SEP_2(a,b); _SELP_28(V); }while(0) // Eat two args, pass the rest up
+#define _SELP_30(a,b,V...) do{ _SEP_2(a,b); _SELP_28(V); }while(0)
+#define _SELP_31(a,b,V...) do{ _SEP_2(a,b); _SELP_29(V); }while(0)
+#define _SELP_32(a,b,V...) do{ _SEP_2(a,b); _SELP_30(V); }while(0)
+#define _SELP_33(a,b,V...) do{ _SEP_2(a,b); _SELP_31(V); }while(0) 
+#define _SELP_34(a,b,V...) do{ _SEP_2(a,b); _SELP_32(V); }while(0) 
+#define _SELP_35(a,b,V...) do{ _SEP_2(a,b); _SELP_33(V); }while(0) 
+#define _SELP_36(a,b,V...) do{ _SEP_2(a,b); _SELP_34(V); }while(0) // Eat two args, pass the rest up
 
 #define SERIAL_ECHOLNPAIR(V...) _SELP_N(NUM_ARGS(V),V)
 
@@ -251,6 +269,8 @@ extern uint8_t marlin_debug_flags;
 #define _SELP_28_P(a,b,V...) do{ _SEP_2_P(a,b); _SELP_26_P(V); }while(0)
 #define _SELP_29_P(a,b,V...) do{ _SEP_2_P(a,b); _SELP_27_P(V); }while(0)
 #define _SELP_30_P(a,b,V...) do{ _SEP_2_P(a,b); _SELP_28_P(V); }while(0) // Eat two args, pass the rest up
+#define _SELP_31_P(a,b,V...) do{ _SEP_2_P(a,b); _SELP_29_P(V); }while(0) // Eat two args, pass the rest up
+#define _SELP_32_P(a,b,V...) do{ _SEP_2_P(a,b); _SELP_30_P(V); }while(0) // Eat two args, pass the rest up
 
 #define SERIAL_ECHOLNPAIR_P(V...) _SELP_N_P(NUM_ARGS(V),V)
 
@@ -336,12 +356,12 @@ void serial_spaces(uint8_t count);
 
 void print_bin(const uint16_t val);
 void print_pos(
-  LIST_N(LINEAR_AXES, const float &x, const float &y, const float &z, const float &i, const float &j, const float &k),
+  LIST_N(LINEAR_AXES, const float &x, const float &y, const float &z, const float &i, const float &j, const float &k, const float &l, const float &m),
   PGM_P const prefix=nullptr, PGM_P const suffix=nullptr
 );
 
 inline void print_pos(const xyz_pos_t &xyz, PGM_P const prefix=nullptr, PGM_P const suffix=nullptr) {
-  print_pos(LIST_N(LINEAR_AXES, xyz.x, xyz.y, xyz.z, xyz.i, xyz.j, xyz.k), prefix, suffix);
+  print_pos(LIST_N(LINEAR_AXES, xyz.x, xyz.y, xyz.z, xyz.i, xyz.j, xyz.k, xyz.l, xyz.m), prefix, suffix);
 }
 
 #define SERIAL_POS(SUFFIX,VAR) do { print_pos(VAR, PSTR("  " STRINGIFY(VAR) "="), PSTR(" : " SUFFIX "\n")); }while(0)

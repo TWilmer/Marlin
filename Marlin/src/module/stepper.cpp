@@ -2684,7 +2684,9 @@ void Stepper::init() {
       | TERN0(INVERT_Z_DIR, _BV(Z_AXIS)),
       | TERN0(INVERT_I_DIR, _BV(I_AXIS)),
       | TERN0(INVERT_J_DIR, _BV(J_AXIS)),
-      | TERN0(INVERT_K_DIR, _BV(K_AXIS))
+      | TERN0(INVERT_K_DIR, _BV(K_AXIS)),
+      | TERN0(INVERT_K_DIR, _BV(L_AXIS)),
+      | TERN0(INVERT_K_DIR, _BV(M_AXIS))
     );
 
   set_directions();
@@ -2705,7 +2707,7 @@ void Stepper::init() {
  * derive the current XYZ position later on.
  */
 void Stepper::_set_position(
-  LIST_N(LINEAR_AXES, const int32_t &a, const int32_t &b, const int32_t &c, const int32_t &i, const int32_t &j, const int32_t &k),
+  LIST_N(LINEAR_AXES, const int32_t &a, const int32_t &b, const int32_t &c, const int32_t &i, const int32_t &j, const int32_t &k, const int32_t &l, const int32_t &m),
   const int32_t &e
 ) {
   #if CORE_IS_XY
@@ -2722,7 +2724,7 @@ void Stepper::_set_position(
     count_position.set(a - b, b, c);
   #else
     // default non-h-bot planning
-    count_position.set(LIST_N(LINEAR_AXES, a, b, c, i, j, k));
+    count_position.set(LIST_N(LINEAR_AXES, a, b, c, i, j, k, l, m));
   #endif
   count_position.e = e;
 }
@@ -2749,12 +2751,12 @@ int32_t Stepper::position(const AxisEnum axis) {
 // Set the current position in steps
 //TODO: Test for LINEAR_AXES >= 4
 void Stepper::set_position(
-  LIST_N(LINEAR_AXES, const int32_t &a, const int32_t &b, const int32_t &c, const int32_t &i, const int32_t &j, const int32_t &k),
+  LIST_N(LINEAR_AXES, const int32_t &a, const int32_t &b, const int32_t &c, const int32_t &i, const int32_t &j, const int32_t &k, const int32_t &l, const int32_t &m),
   const int32_t &e
 ) {
   planner.synchronize();
   const bool was_enabled = suspend();
-  _set_position(LIST_N(LINEAR_AXES, a, b, c, i, j, k), e);
+  _set_position(LIST_N(LINEAR_AXES, a, b, c, i, j, k,l,m), e);
   if (was_enabled) wake_up();
 }
 
@@ -2842,6 +2844,12 @@ void Stepper::report_a_position(const xyz_long_t &pos) {
   #if LINEAR_AXES >= 6
     SERIAL_ECHOPAIR_P(SP_K_LBL, pos.k);
   #endif
+  #if LINEAR_AXES >= 7
+    SERIAL_ECHOPAIR_P(SP_L_LBL, pos.l);
+  #endif  
+  #if LINEAR_AXES >= 8
+    SERIAL_ECHOPAIR_P(SP_M_LBL, pos.m);
+  #endif    
   SERIAL_EOL();
 }
 
@@ -3070,6 +3078,13 @@ void Stepper::report_positions() {
             K_DIR_WRITE(old_dir.k);
           #endif
 
+          #ifdef L_DIR_WRITE
+            L_DIR_WRITE(old_dir.l);
+          #endif
+          #ifdef M_DIR_WRITE
+            M_DIR_WRITE(old_dir.m);
+          #endif                    
+
           EXTRA_DIR_WAIT_AFTER();
 
         #endif
@@ -3085,6 +3100,12 @@ void Stepper::report_positions() {
       #if LINEAR_AXES >= 6
         case K_AXIS: BABYSTEP_AXIS(K, 0, direction); break;
       #endif
+      #if LINEAR_AXES >= 7
+        case L_AXIS: BABYSTEP_AXIS(L, 0, direction); break;
+      #endif
+      #if LINEAR_AXES >= 8
+        case M_AXIS: BABYSTEP_AXIS(M, 0, direction); break;
+      #endif            
 
       default: break;
     }

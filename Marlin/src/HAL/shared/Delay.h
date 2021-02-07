@@ -57,7 +57,7 @@
     }
 
   #else
-
+#define L(CODE) CODE ":\n\t"
     // https://blueprints.launchpad.net/gcc-arm-embedded/+spec/delay-cycles
 
     #define nop() __asm__ __volatile__("nop;\n\t":::)

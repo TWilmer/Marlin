@@ -258,6 +258,45 @@ void reset_stepper_drivers();    // Called by settings.load / settings.reset
   #define K_STEP_READ() bool(READ(K_STEP_PIN))
 #endif
 
+// L Stepper
+#if LINEAR_AXES >= 7
+  #ifndef L_ENABLE_INIT
+    #define L_ENABLE_INIT() SET_OUTPUT(L_ENABLE_PIN)
+    #define L_ENABLE_WRITE(STATE) WRITE(L_ENABLE_PIN,STATE)
+    #define L_ENABLE_READ() bool(READ(L_ENABLE_PIN))
+  #endif
+  #ifndef L_DIR_INIT
+    #define L_DIR_INIT() SET_OUTPUT(L_DIR_PIN)
+    #define L_DIR_WRITE(STATE) WRITE(L_DIR_PIN,STATE)
+    #define L_DIR_READ() bool(READ(L_DIR_PIN))
+  #endif
+  #define L_STEP_INIT() SET_OUTPUT(L_STEP_PIN)
+  #ifndef L_STEP_WRITE
+    #define L_STEP_WRITE(STATE) WRITE(L_STEP_PIN,STATE)
+  #endif
+  #define L_STEP_READ() bool(READ(L_STEP_PIN))
+#endif
+
+// M Stepper
+#if LINEAR_AXES >= 8
+  #ifndef M_ENABLE_INIT
+    #define M_ENABLE_INIT() SET_OUTPUT(M_ENABLE_PIN)
+    #define M_ENABLE_WRITE(STATE) WRITE(M_ENABLE_PIN,STATE)
+    #define M_ENABLE_READ() bool(READ(M_ENABLE_PIN))
+  #endif
+  #ifndef M_DIR_INIT
+    #define M_DIR_INIT() SET_OUTPUT(M_DIR_PIN)
+    #define M_DIR_WRITE(STATE) WRITE(M_DIR_PIN,STATE)
+    #define M_DIR_READ() bool(READ(M_DIR_PIN))
+  #endif
+  #define M_STEP_INIT() SET_OUTPUT(M_STEP_PIN)
+  #ifndef M_STEP_WRITE
+    #define M_STEP_WRITE(STATE) WRITE(M_STEP_PIN,STATE)
+  #endif
+  #define M_STEP_READ() bool(READ(M_STEP_PIN))
+#endif
+
+
 // E0 Stepper
 #ifndef E0_ENABLE_INIT
   #define E0_ENABLE_INIT() SET_OUTPUT(E0_ENABLE_PIN)
@@ -819,6 +858,36 @@ void reset_stepper_drivers();    // Called by settings.load / settings.reset
   #endif
 #endif
 
+#ifndef ENABLE_STEPPER_L
+  #if HAS_L_ENABLE
+    #define  ENABLE_STEPPER_L() L_ENABLE_WRITE( L_ENABLE_ON)
+  #else
+    #define  ENABLE_STEPPER_L() NOOP
+  #endif
+#endif
+#ifndef DISABLE_STEPPER_L
+  #if HAS_L_ENABLE
+    #define DISABLE_STEPPER_L() L_ENABLE_WRITE(!L_ENABLE_ON)
+  #else
+    #define DISABLE_STEPPER_L() NOOP
+  #endif
+#endif
+
+#ifndef ENABLE_STEPPER_M
+  #if HAS_M_ENABLE
+    #define  ENABLE_STEPPER_M() M_ENABLE_WRITE( M_ENABLE_ON)
+  #else
+    #define  ENABLE_STEPPER_M() NOOP
+  #endif
+#endif
+#ifndef DISABLE_STEPPER_M
+  #if HAS_K_ENABLE
+    #define DISABLE_STEPPER_M() M_ENABLE_WRITE(!M_ENABLE_ON)
+  #else
+    #define DISABLE_STEPPER_M() NOOP
+  #endif
+#endif
+
 #ifndef ENABLE_STEPPER_E0
   #if HAS_E0_ENABLE
     #define  ENABLE_STEPPER_E0() E0_ENABLE_WRITE( E_ENABLE_ON)
@@ -978,6 +1047,20 @@ void reset_stepper_drivers();    // Called by settings.load / settings.reset
 #else
   #define  ENABLE_AXIS_K() NOOP
   #define DISABLE_AXIS_K() NOOP
+#endif
+#if LINEAR_AXES >= 7
+  #define  ENABLE_AXIS_L() do{ ENABLE_STEPPER_L(); }while(0)
+  #define DISABLE_AXIS_L() do{ DISABLE_STEPPER_L(); CBI(axis_known_position, L_AXIS); }while(0)
+#else
+  #define  ENABLE_AXIS_L() NOOP
+  #define DISABLE_AXIS_L() NOOP
+#endif
+#if LINEAR_AXES >= 8
+  #define  ENABLE_AXIS_M() do{ ENABLE_STEPPER_M(); }while(0)
+  #define DISABLE_AXIS_M() do{ DISABLE_STEPPER_M(); CBI(axis_known_position, M_AXIS); }while(0)
+#else
+  #define  ENABLE_AXIS_M() NOOP
+  #define DISABLE_AXIS_M() NOOP
 #endif
 
 //

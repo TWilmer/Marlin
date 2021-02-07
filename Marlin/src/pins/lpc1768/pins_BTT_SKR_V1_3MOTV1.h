@@ -17,11 +17,13 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
+ *  This board is an extension to have support for up to 3 more steppers on the motor extension board
  *
  */
 #pragma once
 
-#define BOARD_INFO_NAME "BTT SKR V1.3"
+#define BOARD_INFO_NAME "BTT SKR V1.3 WITH MOT V1.0"
 
 //
 // Trinamic Stallguard pins
@@ -137,6 +139,18 @@
 #define J_ENABLE_PIN                       P0_10
 
 
+#define K_STEP_PIN                         P0_18
+#define K_DIR_PIN                          P3_25
+#define K_ENABLE_PIN                       P1_31
+
+#define L_STEP_PIN                         P3_26
+#define L_DIR_PIN                          P0_16
+#define L_ENABLE_PIN                       P1_23
+
+#define M_STEP_PIN                         P0_17
+#define M_DIR_PIN                          P0_15
+#define M_ENABLE_PIN                       P1_22
+
 
 
 //#ifndef E1_CS_PIN
@@ -195,9 +209,27 @@
   #define J_SERIAL_TX_PIN                 P1_04
   #define J_SERIAL_RX_PIN                 P1_01
 
+//SCHNASE fix these pin assignments
+
+  #define K_SERIAL_TX_PIN                 P1_21
+  #define K_SERIAL_RX_PIN                 P1_21
+
+  #define L_SERIAL_TX_PIN                 P1_19  
+  #define L_SERIAL_RX_PIN                 P1_19
+
+  #define M_SERIAL_TX_PIN                 P1_28
+  #define M_SERIAL_RX_PIN                 P1_28          
+
   // Reduce baud rate to improve software serial reliability
   #define TMC_BAUD_RATE                    19200
 #endif
+
+
+#define FAN_PIN P2_05  // use Heat Bed as main FAN - FAN == PUMP in my  PNP
+#define FAN1_PIN P2_07  
+#define FAN2_PIN P2_04
+
+
 
 /**
  *               _____                                              _____
@@ -210,23 +242,7 @@
  *               EXP2                                               EXP1
  */
 
-#define EXPA1_03_PIN                       P1_23
-#define EXPA1_04_PIN                       P1_22
-#define EXPA1_05_PIN                       P1_21
-#define EXPA1_06_PIN                       P1_20
-#define EXPA1_07_PIN                       P1_19
-#define EXPA1_08_PIN                       P1_18
-#define EXPA1_09_PIN                       P0_28
-#define EXPA1_10_PIN                       P1_30
 
-#define EXPA2_03_PIN                       -1
-#define EXPA2_04_PIN                       P1_31
-#define EXPA2_05_PIN                       P0_18
-#define EXPA2_06_PIN                       P3_25
-#define EXPA2_07_PIN                       P0_16
-#define EXPA2_08_PIN                       P3_26
-#define EXPA2_09_PIN                       P0_15
-#define EXPA2_10_PIN                       P0_17
 
 #if HAS_WIRED_LCD
 

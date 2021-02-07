@@ -83,6 +83,12 @@ uint8_t GcodeSuite::axis_relative = (
   #if LINEAR_AXES >= 6
     | (ar_init.k ? _BV(REL_K) : 0)
   #endif
+  #if LINEAR_AXES >= 7
+    | (ar_init.l ? _BV(REL_L) : 0)
+  #endif  
+  #if LINEAR_AXES >= 8
+    | (ar_init.m ? _BV(REL_M) : 0)
+  #endif    
   | (ar_init.e ? _BV(REL_E) : 0)
 );
 

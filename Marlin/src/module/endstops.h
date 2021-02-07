@@ -29,8 +29,8 @@
 #include <stdint.h>
 
 enum EndstopEnum : char {
-  X_MIN,  Y_MIN,  Z_MIN,  Z_MIN_PROBE,  I_MIN,  J_MIN,  K_MIN,
-  X_MAX,  Y_MAX,  Z_MAX,  I_MAX,  J_MAX,  K_MAX,
+  X_MIN,  Y_MIN,  Z_MIN,  Z_MIN_PROBE,  I_MIN,  J_MIN,  K_MIN,  L_MIN,  M_MIN,
+  X_MAX,  Y_MAX,  Z_MAX,  I_MAX,  J_MAX,  K_MAX,  L_MAX,  M_MAX,
   X2_MIN, X2_MAX,
   Y2_MIN, Y2_MAX,
   Z2_MIN, Z2_MAX,

@@ -229,6 +229,58 @@
   #endif
 #endif
 
+
+#if LINEAR_AXES >= 7
+  #if AXIS7_NAME == 'A'
+    #define STR_L_MIN                       "a_min"
+    #define STR_L_MAX                       "a_max"
+  #elif AXIS7_NAME == 'B'
+    #define STR_L_MIN                       "b_min"
+    #define STR_L_MAX                       "b_max"
+  #elif AXIS7_NAME == 'C'
+    #define STR_L_MIN                       "c_min"
+    #define STR_L_MAX                       "c_max"
+  #elif AXIS7_NAME == 'U'
+    #define STR_L_MIN                       "u_min"
+    #define STR_L_MAX                       "u_max"
+  #elif AXIS7_NAME == 'V'
+    #define STR_L_MIN                       "v_min"
+    #define STR_L_MAX                       "v_max"
+  #elif AXIS7_NAME == 'W'
+    #define STR_L_MIN                       "w_min"
+    #define STR_L_MAX                       "w_max"
+  #else
+    #define STR_L_MIN                       "l_min"
+    #define STR_L_MAX                       "l_max"
+  #endif
+#endif
+
+
+#if LINEAR_AXES >= 8
+  #if AXIS8_NAME == 'A'
+    #define STR_M_MIN                       "a_min"
+    #define STR_M_MAX                       "a_max"
+  #elif AXIS8_NAME == 'B'
+    #define STR_M_MIN                       "b_min"
+    #define STR_M_MAX                       "b_max"
+  #elif AXIS8_NAME == 'C'
+    #define STR_M_MIN                       "c_min"
+    #define STR_M_MAX                       "c_max"
+  #elif AXIS8_NAME == 'U'
+    #define STR_M_MIN                       "u_min"
+    #define STR_M_MAX                       "u_max"
+  #elif AXIS8_NAME == 'V'
+    #define STR_M_MIN                       "v_min"
+    #define STR_M_MAX                       "v_max"
+  #elif AXIS8_NAME == 'W'
+    #define STR_M_MIN                       "w_min"
+    #define STR_M_MAX                       "w_max"
+  #else
+    #define STR_M_MIN                       "l_min"
+    #define STR_M_MAX                       "l_max"
+  #endif
+#endif
+
 #define STR_Z_PROBE                         "z_probe"
 #define STR_FILAMENT_RUNOUT_SENSOR          "filament"
 #define STR_PROBE_OFFSET                    "Probe Offset"
@@ -413,6 +465,46 @@
   #endif
 #else
   #define AXIS6_STR ""
+#endif
+
+#if LINEAR_AXES >= 7
+  #if AXIS7_NAME == 'A'
+    #define AXIS7_STR "A"
+  #elif AXIS7_NAME == 'B'
+    #define AXIS7_STR "B"
+  #elif AXIS7_NAME == 'C'
+    #define AXIS7_STR "C"
+  #elif AXIS7_NAME == 'U'
+    #define AXIS7_STR "U"
+  #elif AXIS7_NAME == 'V'
+    #define AXIS7_STR "V"
+  #elif AXIS7_NAME == 'W'
+    #define AXIS7_STR "W"
+  #else
+    #define AXIS7_STR "L"
+  #endif
+#else
+  #define AXIS7_STR ""
+#endif
+
+#if LINEAR_AXES >= 8
+  #if AXIS8_NAME == 'A'
+    #define AXIS8_STR "A"
+  #elif AXIS8_NAME == 'B'
+    #define AXIS8_STR "B"
+  #elif AXIS8_NAME == 'C'
+    #define AXIS8_STR "C"
+  #elif AXIS8_NAME == 'U'
+    #define AXIS8_STR "U"
+  #elif AXIS8_NAME == 'V'
+    #define AXIS8_STR "V"
+  #elif AXIS8_NAME == 'W'
+    #define AXIS8_STR "W"
+  #else
+    #define AXIS8_STR "M"
+  #endif
+#else
+  #define AXIS8_STR ""
 #endif
 
 #define STR_X "X"

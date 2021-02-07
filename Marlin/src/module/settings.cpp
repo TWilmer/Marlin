@@ -158,10 +158,10 @@
 #endif
 
 #pragma pack(push, 1) // No padding between variables
-typedef struct { uint16_t LIST_N(LINEAR_AXES, X, Y, Z, I, J, K), X2, Y2, Z2, Z3, Z4, E0, E1, E2, E3, E4, E5, E6, E7; } tmc_stepper_current_t;
-typedef struct { uint32_t LIST_N(LINEAR_AXES, X, Y, Z, I, J, K), X2, Y2, Z2, Z3, Z4, E0, E1, E2, E3, E4, E5, E6, E7; } tmc_hybrid_threshold_t;
+typedef struct { uint16_t LIST_N(LINEAR_AXES, X, Y, Z, I, J, K, L, M), X2, Y2, Z2, Z3, Z4, E0, E1, E2, E3, E4, E5, E6, E7; } tmc_stepper_current_t;
+typedef struct { uint32_t LIST_N(LINEAR_AXES, X, Y, Z, I, J, K, L, M), X2, Y2, Z2, Z3, Z4, E0, E1, E2, E3, E4, E5, E6, E7; } tmc_hybrid_threshold_t;
 typedef struct { int16_t X, Y, Z, X2;                                     } tmc_sgt_t; // TODO: Add support for LINEAR_AXES >= 4
-typedef struct { bool LIST_N(LINEAR_AXES, X, Y, Z, I, J, K), X2, Y2, Z2, Z3, Z4, E0, E1, E2, E3, E4, E5, E6, E7; } tmc_stealth_enabled_t;
+typedef struct { bool LIST_N(LINEAR_AXES, X, Y, Z, I, J, K, L, M), X2, Y2, Z2, Z3, Z4, E0, E1, E2, E3, E4, E5, E6, E7; } tmc_stealth_enabled_t;
 
 // Limit an index to an array size
 #define ALIM(I,ARR) _MIN(I, (signed)COUNT(ARR) - 1)
@@ -638,7 +638,7 @@ void MarlinSettings::postprocess() {
           EEPROM_WRITE(dummyf);
         #endif
       #else
-        const xyze_pos_t planner_max_jerk = { LIST_N(LINEAR_AXES, 10, 10, 0.4, 0.4, 0.4, 0.4), float(DEFAULT_EJERK) };
+        const xyze_pos_t planner_max_jerk = { LIST_N(LINEAR_AXES, 10, 10, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4), float(DEFAULT_EJERK) };
         EEPROM_WRITE(planner_max_jerk);
       #endif
 
@@ -1202,8 +1202,9 @@ void MarlinSettings::postprocess() {
           #endif // MAX_EXTRUDERS > 1
         #endif // MAX_EXTRUDERS
       #else
+        #undef L
         const tmc_hybrid_threshold_t tmc_hybrid_threshold = {
-          LIST_N(LINEAR_AXES, .X = 100, .Y = 100, .Z = 3, .I = 3, .J = 3, .K = 3),
+          LIST_N(LINEAR_AXES, .X = 100, .Y = 100, .Z = 3, .I = 3, .J = 3, .K = 3, .L = 3, .M = 3),
           .X2 = 100, .Y2 = 100, .Z2 =   3, .Z3 =   3, .Z4 = 3,
           .E0 =  30, .E1 =  30, .E2 =  30,
           .E3 =  30, .E4 =  30, .E5 =  30
@@ -3109,8 +3110,14 @@ void MarlinSettings::reset() {
         SP_J_STR, LINEAR_UNIT(planner.settings.max_feedrate_mm_s[J_AXIS]),
         #endif
         #if LINEAR_AXES >= 6        
-        SP_K_STR, LINEAR_UNIT(planner.settings.max_feedrate_mm_s[K_AXIS])
+        SP_K_STR, LINEAR_UNIT(planner.settings.max_feedrate_mm_s[K_AXIS]),
         #endif
+        #if LINEAR_AXES >= 7
+        SP_L_STR, LINEAR_UNIT(planner.settings.max_feedrate_mm_s[L_AXIS]),
+        #endif
+        #if LINEAR_AXES >= 8        
+        SP_M_STR, LINEAR_UNIT(planner.settings.max_feedrate_mm_s[M_AXIS])
+        #endif                
       )
       #if DISABLED(DISTINCT_E_FACTORS) && EXTRUDERS > 0 
         , SP_E_STR, VOLUMETRIC_UNIT(planner.settings.max_feedrate_mm_s[E_AXIS])
@@ -3140,8 +3147,14 @@ void MarlinSettings::reset() {
         SP_J_STR, LINEAR_UNIT(planner.settings.max_acceleration_mm_per_s2[J_AXIS]),
         #endif
         #if LINEAR_AXES >= 6        
-        SP_K_STR, LINEAR_UNIT(planner.settings.max_acceleration_mm_per_s2[K_AXIS])
+        SP_K_STR, LINEAR_UNIT(planner.settings.max_acceleration_mm_per_s2[K_AXIS]),
         #endif
+        #if LINEAR_AXES >= 7       
+        SP_L_STR, LINEAR_UNIT(planner.settings.max_acceleration_mm_per_s2[L_AXIS]),
+        #endif
+        #if LINEAR_AXES >= 8        
+        SP_M_STR, LINEAR_UNIT(planner.settings.max_acceleration_mm_per_s2[M_AXIS])
+        #endif                
       )
       #if DISABLED(DISTINCT_E_FACTORS)  && EXTRUDERS > 0 
         , SP_E_STR, VOLUMETRIC_UNIT(planner.settings.max_acceleration_mm_per_s2[E_AXIS])

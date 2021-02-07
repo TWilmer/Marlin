@@ -733,6 +733,12 @@ class Planner {
       #if LINEAR_AXES >= 6
         , const float &k
       #endif
+      #if LINEAR_AXES >= 7
+        , const float &l
+      #endif      
+      #if LINEAR_AXES >= 8
+        , const float &m
+      #endif            
       , const float &e
       #if HAS_DIST_MM_ARG
         , const xyze_float_t &cart_dist_mm
@@ -747,7 +753,7 @@ class Planner {
       , const feedRate_t &fr_mm_s, const uint8_t extruder, const float &millimeters=0.0
     ) {
       return buffer_segment(
-        LIST_N(LINEAR_AXES, abce.a, abce.b, abce.c, abce.i, abce.j, abce.k), abce.e
+        LIST_N(LINEAR_AXES, abce.a, abce.b, abce.c, abce.i, abce.j, abce.k, abce.l, abce.m), abce.e
         #if HAS_DIST_MM_ARG
           , cart_dist_mm
         #endif
@@ -778,6 +784,12 @@ class Planner {
       #if LINEAR_AXES >= 6
         , const float &rk
       #endif
+      #if LINEAR_AXES >= 7
+        , const float &rl
+      #endif
+      #if LINEAR_AXES >= 8
+        , const float &rm
+      #endif
       , const float &e, const feedRate_t &fr_mm_s, const uint8_t extruder, const float millimeters=0.0
       #if ENABLED(SCARA_FEEDRATE_SCALING)
         , const float &inv_duration=0.0
@@ -790,7 +802,7 @@ class Planner {
       #endif
     ) {
       return buffer_line(
-        LIST_N(LINEAR_AXES, cart.x, cart.y, cart.z, cart.i, cart.j, cart.k)
+        LIST_N(LINEAR_AXES, cart.x, cart.y, cart.z, cart.i, cart.j, cart.k, cart.l, cart.m)
         , cart.e, fr_mm_s, extruder, millimeters
         #if ENABLED(SCARA_FEEDRATE_SCALING)
           , inv_duration
@@ -822,13 +834,19 @@ class Planner {
       #if LINEAR_AXES >= 5
         , const float &rj
       #endif
-      #if LINEAR_AXES > 5
+      #if LINEAR_AXES >= 6
         , const float &rk
       #endif
+      #if LINEAR_AXES >= 7
+        , const float &rl
+      #endif
+      #if LINEAR_AXES >= 8
+        , const float &rm
+      #endif            
       , const float &e
     );
     FORCE_INLINE static void set_position_mm(const xyze_pos_t &cart) { 
-      set_position_mm(LIST_N(LINEAR_AXES, cart.x, cart.y, cart.z, cart.i, cart.j, cart.k), cart.e);
+      set_position_mm(LIST_N(LINEAR_AXES, cart.x, cart.y, cart.z, cart.i, cart.j, cart.k, cart.l, cart.m), cart.e);
     }
     static void set_e_position_mm(const float &e);
 
@@ -848,11 +866,17 @@ class Planner {
       #if LINEAR_AXES >= 6
         , const float &k
       #endif
+      #if LINEAR_AXES >= 7
+        , const float &l
+      #endif
+      #if LINEAR_AXES >= 8
+        , const float &m
+      #endif            
       , const float &e
     );
     FORCE_INLINE static void set_machine_position_mm(const abce_pos_t &abce) {
       set_machine_position_mm(
-        LIST_N(LINEAR_AXES, abce.a, abce.b, abce.c, abce.i, abce.j, abce.k), abce.e
+        LIST_N(LINEAR_AXES, abce.a, abce.b, abce.c, abce.i, abce.j, abce.k, abce.l, abce.m), abce.e
       );
     }
 
@@ -870,7 +894,9 @@ class Planner {
           get_axis_position_mm(C_AXIS),
           get_axis_position_mm(I_AXIS),
           get_axis_position_mm(J_AXIS),
-          get_axis_position_mm(K_AXIS)
+          get_axis_position_mm(K_AXIS),
+          get_axis_position_mm(L_AXIS),
+          get_axis_position_mm(M_AXIS)
         ),
         get_axis_position_mm(E_AXIS)
       };

@@ -421,7 +421,7 @@ void Endstops::event_handler() {
   prev_hit_state = hit_state;
   if (hit_state) {
     #if HAS_WIRED_LCD
-      char LIST_N(LINEAR_AXES, chrX = ' ', chrY = ' ', chrZ = ' ', chrI = ' ', chrJ = ' ', chrK = ' '),
+      char LIST_N(LINEAR_AXES, chrX = ' ', chrY = ' ', chrZ = ' ', chrI = ' ', chrJ = ' ', chrK = ' ', chrL = ' ', chrM = ' '),
            chrP = ' ';
       #define _SET_STOP_CHAR(A,C) (chr## A = C)
     #else
@@ -455,6 +455,14 @@ void Endstops::event_handler() {
     #if LINEAR_AXES >= 6
       _ENDSTOP_HIT_TEST(K,'K');
     #endif
+    #if LINEAR_AXES >= 7
+       #undef L
+      _ENDSTOP_HIT_TEST(L,'L');
+    #endif    
+    #if LINEAR_AXES >= 8
+       #undef M
+      _ENDSTOP_HIT_TEST(M,'M');
+    #endif        
 
     #if HAS_CUSTOM_PROBE_PIN
       #define P_AXIS Z_AXIS
@@ -464,9 +472,9 @@ void Endstops::event_handler() {
 
     TERN_(HAS_WIRED_LCD,
       ui.status_printf_P(0,
-        PSTR(S_FMT GANG_N(LINEAR_AXES, " %c", " %c", " %c", " %c", " %c", " %c") " %c"),
+        PSTR(S_FMT GANG_N(LINEAR_AXES, " %c", " %c", " %c", " %c", " %c", " %c", " %c", " %c") " %c"),
         GET_TEXT(MSG_LCD_ENDSTOPS),
-        LIST_N(LINEAR_AXES, chrX, chrY, chrZ, chrI, chrJ, chrK), chrP
+        LIST_N(LINEAR_AXES, chrX, chrY, chrZ, chrI, chrJ, chrK, chrL, chrM), chrP
       )
     );
 

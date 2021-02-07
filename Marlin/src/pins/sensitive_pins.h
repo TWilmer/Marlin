@@ -247,6 +247,89 @@
 
 #endif
 
+#if LINEAR_AXES >= 7
+
+  #if PIN_EXISTS(L_MIN)
+    #define _L_MIN L_MIN_PIN,
+  #else
+    #define _L_MIN
+  #endif
+  #if PIN_EXISTS(L_MAX)
+    #define _L_MAX L_MAX_PIN,
+  #else
+    #define _L_MAX
+  #endif
+  #if PIN_EXISTS(L_CS)
+    #define _L_CS L_CS_PIN,
+  #else
+    #define _L_CS
+  #endif
+  #if PIN_EXISTS(L_MS1)
+    #define _L_MS1 L_MS1_PIN,
+  #else
+    #define _L_MS1
+  #endif
+  #if PIN_EXISTS(L_MS2)
+    #define _L_MS2 L_MS2_PIN,
+  #else
+    #define _L_MS2
+  #endif
+  #if PIN_EXISTS(L_MS3)
+    #define _L_MS3 L_MS3_PIN,
+  #else
+    #define _L_MS3
+  #endif
+
+  #define _L_PINS L_STEP_PIN, L_DIR_PIN, L_ENABLE_PIN, _L_MIN _L_MAX _L_MS1 _L_MS2 _L_MS3 _L_CS
+
+#else
+
+  #define _L_PINS
+
+#endif
+
+#if LINEAR_AXES >= 8
+
+  #if PIN_EXISTS(M_MIN)
+    #define _M_MIN M_MIN_PIN,
+  #else
+    #define _M_MIN
+  #endif
+  #if PIN_EXISTS(M_MAX)
+    #define _M_MAX M_MAX_PIN,
+  #else
+    #define _M_MAX
+  #endif
+  #if PIN_EXISTS(M_CS)
+    #define _M_CS M_CS_PIN,
+  #else
+    #define _M_CS
+  #endif
+  #if PIN_EXISTS(M_MS1)
+    #define _M_MS1 M_MS1_PIN,
+  #else
+    #define _M_MS1
+  #endif
+  #if PIN_EXISTS(M_MS2)
+    #define _M_MS2 M_MS2_PIN,
+  #else
+    #define _M_MS2
+  #endif
+  #if PIN_EXISTS(M_MS3)
+    #define _M_MS3 M_MS3_PIN,
+  #else
+    #define _M_MS3
+  #endif
+
+  #define _M_PINS M_STEP_PIN, M_DIR_PIN, M_ENABLE_PIN, _M_MIN _M_MAX _M_MS1 _M_MS2 _M_MS3 _M_CS
+
+#else
+
+  #define _M_PINS
+
+#endif
+
+
 //
 // Extruder Chip Select, Digital Micro-steps
 //

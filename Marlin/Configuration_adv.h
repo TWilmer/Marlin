@@ -636,8 +636,8 @@
 
 //#define SENSORLESS_BACKOFF_MM  { 2, 2 }     // (mm) Backoff from endstops before sensorless homing
 
-#define HOMING_BUMP_MM      ARRAY_N(LINEAR_AXES, 5, 5, 5, 5, 5, 5)       // (mm) Backoff from endstops after first bump
-#define HOMING_BUMP_DIVISOR ARRAY_N(LINEAR_AXES, 2, 2, 2, 2, 2, 2)       // Re-Bump Speed Divisor (Divides the Homing Feedrate)
+#define HOMING_BUMP_MM      ARRAY_N(LINEAR_AXES, 5, 5, 5, 5, 5, 5, 5, 5)       // (mm) Backoff from endstops after first bump
+#define HOMING_BUMP_DIVISOR ARRAY_N(LINEAR_AXES, 2, 2, 2, 2, 2, 2, 2, 2)       // Re-Bump Speed Divisor (Divides the Homing Feedrate)
 //#define HOMING_BACKOFF_POST_MM ARRAY_N(LINEAR_AXES, 2, 2, 2, 2, 2, 2)  // (mm) Backoff from endstops after homing
 
 #define MOVE_AWAY_FIRST   // if in endstop, move away before homing
@@ -806,7 +806,7 @@
 #endif
 
 // @section motion
-#define AXIS_RELATIVE_MODES ARRAY_N(INCREMENT(LINEAR_AXES), false, false, false, false, false, false, false)
+#define AXIS_RELATIVE_MODES ARRAY_N(INCREMENT(LINEAR_AXES), false, false, false, false, false, false, false, false, false, false)
 
 // Add a Duplicate option for well-separated conjoined nozzles
 //#define MULTI_NOZZLE_DUPLICATION
@@ -818,6 +818,8 @@
 #define INVERT_I_STEP_PIN false
 #define INVERT_J_STEP_PIN false
 #define INVERT_K_STEP_PIN false
+#define INVERT_L_STEP_PIN false
+#define INVERT_M_STEP_PIN false
 #define INVERT_E_STEP_PIN false
 
 /**
@@ -832,6 +834,8 @@
 #define DISABLE_INACTIVE_I true
 #define DISABLE_INACTIVE_J true
 #define DISABLE_INACTIVE_K true
+#define DISABLE_INACTIVE_L true
+#define DISABLE_INACTIVE_M true
 #define DISABLE_INACTIVE_E true
 
 // If the Nozzle or Bed falls when the Z stepper is disabled, set its resting position here.
@@ -985,7 +989,7 @@
 //#define MICROSTEP32 HIGH,LOW,HIGH
 
 // Microstep settings (Requires a board with pins named X_MS1, X_MS2, etc.)
-#define MICROSTEP_MODES { 128, 128, 128, 128, 128, 128 } // [1,2,4,8,16]
+#define MICROSTEP_MODES { 128, 128, 128, 128, 128, 128, 128, 128 } // [1,2,4,8,16]
 
 /**
  *  @section  stepper motor current
@@ -2349,7 +2353,7 @@
     #define J_MICROSTEPS    128
     #define J_RSENSE         0.11
     #define J_CHAIN_POS     -1
-  #endif
+  #endif  
 
   #if AXIS_IS_TMC(K)
     #define K_CURRENT      400
@@ -2358,6 +2362,23 @@
     #define K_RSENSE         0.11
     #define K_CHAIN_POS     -1
   #endif
+
+
+  #if AXIS_IS_TMC(L)
+    #define L_CURRENT      400
+    #define L_CURRENT_HOME L_CURRENT
+    #define L_MICROSTEPS    16
+    #define L_RSENSE         0.11
+    #define L_CHAIN_POS     -1
+  #endif
+
+  #if AXIS_IS_TMC(M)
+    #define M_CURRENT      400
+    #define M_CURRENT_HOME M_CURRENT
+    #define M_MICROSTEPS    16
+    #define M_RSENSE         0.11
+    #define M_CHAIN_POS     -1
+  #endif    
 
   #if AXIS_IS_TMC(E0)
     #define E0_CURRENT      800
@@ -2466,6 +2487,8 @@
   #define  I_SLAVE_ADDRESS 0
   #define  J_SLAVE_ADDRESS 0
   #define  K_SLAVE_ADDRESS 0
+  #define  L_SLAVE_ADDRESS 0
+  #define  M_SLAVE_ADDRESS 0
   #define X2_SLAVE_ADDRESS 0
   #define Y2_SLAVE_ADDRESS 0
   #define Z2_SLAVE_ADDRESS 0
@@ -2498,6 +2521,8 @@
   #define STEALTHCHOP_I
   #define STEALTHCHOP_J
   #define STEALTHCHOP_K
+  #define STEALTHCHOP_L
+  #define STEALTHCHOP_M
   #define STEALTHCHOP_E
 
   /**
@@ -2556,6 +2581,8 @@
   #define I_HYBRID_THRESHOLD     100
   #define J_HYBRID_THRESHOLD     100
   #define K_HYBRID_THRESHOLD     100
+  #define L_HYBRID_THRESHOLD     100
+  #define M_HYBRID_THRESHOLD     100
   #define E0_HYBRID_THRESHOLD     30
   #define E1_HYBRID_THRESHOLD     30
   #define E2_HYBRID_THRESHOLD     30
@@ -2605,6 +2632,8 @@
     //#define I_STALL_SENSITIVITY  8
     //#define J_STALL_SENSITIVITY  8
     //#define K_STALL_SENSITIVITY  8
+    //#define L_STALL_SENSITIVITY  8
+    //#define M_STALL_SENSITIVITY  8
     //#define SPI_ENDSTOPS              // TMC2130 only
     //#define IMPROVE_HOMING_RELIABILITY
   #endif

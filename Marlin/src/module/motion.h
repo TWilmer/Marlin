@@ -36,7 +36,7 @@
 
 // Axis homed and known-position states
 extern uint8_t axis_homed, axis_known_position;
-constexpr uint8_t xyz_bits = GANG_N(LINEAR_AXES, _BV(X_AXIS), | _BV(Y_AXIS), | _BV(Z_AXIS), | _BV(I_AXIS), | _BV(J_AXIS), | _BV(K_AXIS));
+constexpr uint8_t xyz_bits = GANG_N(LINEAR_AXES, _BV(X_AXIS), | _BV(Y_AXIS), | _BV(Z_AXIS), | _BV(I_AXIS), | _BV(J_AXIS), | _BV(K_AXIS), | _BV(L_AXIS), | _BV(M_AXIS));
 FORCE_INLINE bool no_axes_homed() { return !axis_homed; }
 FORCE_INLINE bool all_axes_homed() { return (axis_homed & xyz_bits) == xyz_bits; }
 FORCE_INLINE bool all_axes_known() { return (axis_known_position & xyz_bits) == xyz_bits; }
@@ -119,7 +119,7 @@ inline int8_t pgm_read_any(const int8_t *p) { return TERN(__IMXRT1062__, *p, pgm
 
 #define XYZ_DEFS(T, NAME, OPT) \
   inline T NAME(const AxisEnum axis) { \
-      static const XYZval<T> NAME##_P DEFS_PROGMEM = ARRAY_N(LINEAR_AXES, X_##OPT, Y_##OPT, Z_##OPT, I_##OPT, J_##OPT, K_##OPT); \
+      static const XYZval<T> NAME##_P DEFS_PROGMEM = ARRAY_N(LINEAR_AXES, X_##OPT, Y_##OPT, Z_##OPT, I_##OPT, J_##OPT, K_##OPT, L_##OPT, M_##OPT); \
     return pgm_read_any(&NAME##_P[axis]); \
   }
 XYZ_DEFS(float, base_min_pos,   MIN_POS);
@@ -219,7 +219,7 @@ inline void prepare_internal_move_to_destination(const feedRate_t &fr_mm_s=0.0f)
  * Blocking movement and shorthand functions
  */
 void do_blocking_move_to(
-  LIST_N(LINEAR_AXES, const float rx, const float ry, const float rz, const float ri, const float rj, const float rk),
+  LIST_N(LINEAR_AXES, const float rx, const float ry, const float rz, const float ri, const float rj, const float rk, const float rl, const float rm),
   const feedRate_t &fr_mm_s=0.0f
 );
 void do_blocking_move_to(const xy_pos_t &raw, const feedRate_t &fr_mm_s=0.0f);
@@ -327,6 +327,17 @@ void homeaxis(const AxisEnum axis);
 #if LINEAR_AXES >= 6
   #define LOGICAL_K_POSITION(POS) NATIVE_TO_LOGICAL(POS, K_AXIS)
   #define RAW_K_POSITION(POS)     LOGICAL_TO_NATIVE(POS, K_AXIS)
+#endif
+
+#if LINEAR_AXES >= 7
+  #define LOGICAL_L_POSITION(POS) NATIVE_TO_LOGICAL(POS, L_AXIS)
+  #define RAW_L_POSITION(POS)     LOGICAL_TO_NATIVE(POS, L_AXIS)
+#endif
+
+
+#if LINEAR_AXES >= 8
+  #define LOGICAL_M_POSITION(POS) NATIVE_TO_LOGICAL(POS, M_AXIS)
+  #define RAW_M_POSITION(POS)     LOGICAL_TO_NATIVE(POS, M_AXIS)
 #endif
 
 /**

@@ -65,15 +65,15 @@ void print_bin(uint16_t val) {
   }
 }
 
-extern const char SP_X_STR[], SP_Y_STR[], SP_Z_STR[], SP_I_STR[], SP_J_STR[], SP_K_STR[];
+extern const char SP_X_STR[], SP_Y_STR[], SP_Z_STR[], SP_I_STR[], SP_J_STR[], SP_K_STR[], SP_L_STR[], SP_M_STR[];
 
 void print_pos(
-  LIST_N(LINEAR_AXES, const float &x, const float &y, const float &z, const float &i, const float &j, const float &k),
+  LIST_N(LINEAR_AXES, const float &x, const float &y, const float &z, const float &i, const float &j, const float &k, const float &l, const float &m),
   PGM_P const prefix/*=nullptr*/, PGM_P const suffix/*=nullptr*/
 ) {
   if (prefix) serialprintPGM(prefix);
   SERIAL_ECHOPAIR_P(
-    LIST_N(DOUBLE(LINEAR_AXES), SP_X_STR, x, SP_Y_STR, y, SP_Z_STR, z, SP_I_STR, i, SP_J_STR, j, SP_K_STR, k)
+    LIST_N(DOUBLE(LINEAR_AXES), SP_X_STR, x, SP_Y_STR, y, SP_Z_STR, z, SP_I_STR, i, SP_J_STR, j, SP_K_STR, k, SP_L_STR, l, SP_M_STR, m)
   );
   if (suffix) serialprintPGM(suffix); else SERIAL_EOL();
 }

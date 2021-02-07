@@ -45,6 +45,12 @@ enum StealthIndex : uint8_t { STEALTH_AXIS_XY, STEALTH_AXIS_Z,
   #if LINEAR_AXES >= 6
     STEALTH_AXIS_K,
   #endif
+  #if LINEAR_AXES >= 7
+    STEALTH_AXIS_L,
+  #endif
+  #if LINEAR_AXES >= 8
+    STEALTH_AXIS_M,
+  #endif    
   STEALTH_AXIS_E
 };
 #define TMC_INIT(ST, STEALTH_INDEX) tmc_init(stepper##ST, ST##_CURRENT, ST##_MICROSTEPS, ST##_HYBRID_THRESHOLD, stealthchop_by_axis[STEALTH_INDEX])
@@ -114,6 +120,12 @@ enum StealthIndex : uint8_t { STEALTH_AXIS_XY, STEALTH_AXIS_Z,
 #endif
 #if AXIS_HAS_SPI(K)
   TMC_SPI_DEFINE(K, K);
+#endif
+#if AXIS_HAS_SPI(L)
+  TMC_SPI_DEFINE(L, L);
+#endif
+#if AXIS_HAS_SPI(M)
+  TMC_SPI_DEFINE(M, M);
 #endif
 #if AXIS_HAS_SPI(E0)
   TMC_SPI_DEFINE_E(0);
@@ -319,6 +331,20 @@ enum StealthIndex : uint8_t { STEALTH_AXIS_XY, STEALTH_AXIS_Z,
       TMC_UART_DEFINE(SW, K, K);
     #endif
   #endif
+  #if AXIS_HAS_UART(L)
+    #ifdef L_HARDWARE_SERIAL
+      TMC_UART_DEFINE(HW, L, L);
+    #else
+      TMC_UART_DEFINE(SW, L, L);
+    #endif
+  #endif
+  #if AXIS_HAS_UART(M)
+    #ifdef M_HARDWARE_SERIAL
+      TMC_UART_DEFINE(HW, M, M);
+    #else
+      TMC_UART_DEFINE(SW, M, M);
+    #endif
+  #endif    
 
   #if AXIS_HAS_UART(E0)
     #ifdef E0_HARDWARE_SERIAL
@@ -393,7 +419,9 @@ enum StealthIndex : uint8_t { STEALTH_AXIS_XY, STEALTH_AXIS_Z,
     #endif
   #endif
 
-  enum TMCAxis : uint8_t { LIST_N(LINEAR_AXES, X, Y, Z, I, J, K), X2, Y2, Z2, Z3, Z4, E0, E1, E2, E3, E4, E5, E6, E7, TOTAL };
+  #undef L
+  #undef M
+   enum TMCAxis : uint8_t { LIST_N(LINEAR_AXES, X, Y, Z, I, J, K, L, M), X2, Y2, Z2, Z3, Z4, E0, E1, E2, E3, E4, E5, E6, E7, TOTAL };
 
   void tmc_serial_begin() {
     #if HAS_TMC_HW_SERIAL

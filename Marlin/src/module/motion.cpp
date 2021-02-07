@@ -94,7 +94,7 @@ bool relative_mode; // = false;
  *   Used by 'line_to_current_position' to do a move after changing it.
  *   Used by 'sync_plan_position' to update 'planner.position'.
  */
-xyze_pos_t current_position = { LIST_N(LINEAR_AXES, X_HOME_POS, Y_HOME_POS, Z_HOME_POS, I_HOME_POS, J_HOME_POS, K_HOME_POS), 0 };
+xyze_pos_t current_position = { LIST_N(LINEAR_AXES, X_HOME_POS, Y_HOME_POS, Z_HOME_POS, I_HOME_POS, J_HOME_POS, K_HOME_POS, L_HOME_POS, M_HOME_POS), 0 };
 
 /**
  * Cartesian Destination
@@ -422,11 +422,11 @@ void _internal_move_to_destination(const feedRate_t &fr_mm_s/*=0.0f*/
  * Plan a move to (X, Y, Z, [I, [J, [K]]]) and set the current_position
  */
 void do_blocking_move_to(
-  LIST_N(LINEAR_AXES, const float rx, const float ry, const float rz, const float ri, const float rj, const float rk),
+  LIST_N(LINEAR_AXES, const float rx, const float ry, const float rz, const float ri, const float rj, const float rk, const float rl, const float rm),
   const feedRate_t &fr_mm_s/*=0.0f*/
 ) {
   DEBUG_SECTION(log_move, "do_blocking_move_to", DEBUGGING(LEVELING));
-  if (DEBUGGING(LEVELING)) DEBUG_XYZ("> ", LIST_N(LINEAR_AXES, rx, ry, rz, ri, rj, rk));
+  if (DEBUGGING(LEVELING)) DEBUG_XYZ("> ", LIST_N(LINEAR_AXES, rx, ry, rz, ri, rj, rk, rl, rm));
 
   const feedRate_t z_feedrate = fr_mm_s ?: homing_feedrate(Z_AXIS),
                   xy_feedrate = fr_mm_s ?: feedRate_t(XY_PROBE_FEEDRATE_MM_S);
@@ -516,19 +516,19 @@ void do_blocking_move_to(
 }
 
 void do_blocking_move_to(const xy_pos_t &raw, const feedRate_t &fr_mm_s/*=0.0f*/) {
-  do_blocking_move_to(LIST_N(LINEAR_AXES, raw.x, raw.y, current_position.z, current_position.i, current_position.j, current_position.k), fr_mm_s);
+  do_blocking_move_to(LIST_N(LINEAR_AXES, raw.x, raw.y, current_position.z, current_position.i, current_position.j, current_position.k, current_position.l, current_position.m), fr_mm_s);
 }
 void do_blocking_move_to(const xyz_pos_t &raw, const feedRate_t &fr_mm_s/*=0.0f*/) {
-  do_blocking_move_to(LIST_N(LINEAR_AXES, raw.x, raw.y, raw.z, raw.i, raw.j, raw.k), fr_mm_s);
+  do_blocking_move_to(LIST_N(LINEAR_AXES, raw.x, raw.y, raw.z, raw.i, raw.j, raw.k, raw.l, raw.m), fr_mm_s);
 }
 void do_blocking_move_to_x(const float &rx, const feedRate_t &fr_mm_s/*=0.0*/) {
   do_blocking_move_to(
-    LIST_N(LINEAR_AXES, rx, current_position.y, current_position.z, current_position.i, current_position.j, current_position.k),
+    LIST_N(LINEAR_AXES, rx, current_position.y, current_position.z, current_position.i, current_position.j, current_position.k, current_position.l, current_position.m),
   fr_mm_s);
 }
 void do_blocking_move_to_y(const float &ry, const feedRate_t &fr_mm_s/*=0.0*/) {
   do_blocking_move_to(
-    LIST_N(LINEAR_AXES, current_position.x, ry, current_position.z, current_position.i, current_position.j, current_position.k),
+    LIST_N(LINEAR_AXES, current_position.x, ry, current_position.z, current_position.i, current_position.j, current_position.k, current_position.l, current_position.m),
     fr_mm_s);
 }
 void do_blocking_move_to_z(const float &rz, const feedRate_t &fr_mm_s/*=0.0*/) {
@@ -549,13 +549,13 @@ void do_blocking_move_to_z(const float &rz, const feedRate_t &fr_mm_s/*=0.0*/) {
     do_blocking_move_to_xyz_i(current_position, ri, fr_mm_s);
   }
   void do_blocking_move_to_xyz_i(const xyze_pos_t &raw, const float &i, const feedRate_t &fr_mm_s/*=0.0f*/) {
-	  do_blocking_move_to(raw.x, raw.y, raw.z, i, raw.j, fr_mm_s);
+	  do_blocking_move_to(raw.x, raw.y, raw.z, i, raw.j, raw.k, raw.l, raw.m, fr_mm_s);
   }
   void do_blocking_move_to_j(const float &rj, const feedRate_t &fr_mm_s/*=0.0*/) {
     do_blocking_move_to_xyzi_j(current_position, rj, fr_mm_s);
   }
   void do_blocking_move_to_xyzi_j(const xyze_pos_t &raw, const float &j, const feedRate_t &fr_mm_s/*=0.0f*/) {
-    do_blocking_move_to(raw.x, raw.y, raw.z, raw.i, j, fr_mm_s);
+    do_blocking_move_to(raw.x, raw.y, raw.z, raw.i, j, raw.l, raw.m, fr_mm_s);
   }
 #endif
 
@@ -564,13 +564,15 @@ void do_blocking_move_to_z(const float &rz, const feedRate_t &fr_mm_s/*=0.0*/) {
     do_blocking_move_to_xyzij_k(current_position, rk, fr_mm_s);
   }
   void do_blocking_move_to_xyzij_k(const xyze_pos_t &raw, const float &k, const feedRate_t &fr_mm_s/*=0.0f*/) {
-    do_blocking_move_to(raw.x, raw.y, raw.z, raw.i, raw.j, k, fr_mm_s);
+    do_blocking_move_to(raw.x, raw.y, raw.z, raw.i, raw.j, k, raw.l, raw.m, fr_mm_s);
   }
 #endif
 
+
+
 void do_blocking_move_to_xy(const float &rx, const float &ry, const feedRate_t &fr_mm_s/*=0.0*/) {
   do_blocking_move_to(
-    LIST_N(LINEAR_AXES, rx, ry, current_position.z, current_position.i, current_position.j, current_position.k),
+    LIST_N(LINEAR_AXES, rx, ry, current_position.z, current_position.i, current_position.j, current_position.k, current_position.l, current_position.m),
     fr_mm_s
   );
 }
@@ -580,7 +582,7 @@ void do_blocking_move_to_xy(const xy_pos_t &raw, const feedRate_t &fr_mm_s/*=0.0
 
 void do_blocking_move_to_xy_z(const xy_pos_t &raw, const float &z, const feedRate_t &fr_mm_s/*=0.0f*/) {
   do_blocking_move_to(
-    LIST_N(LINEAR_AXES, raw.x, raw.y, z, current_position.i, current_position.j, current_position.k),
+    LIST_N(LINEAR_AXES, raw.x, raw.y, z, current_position.i, current_position.j, current_position.k, current_position.l, current_position.m),
     fr_mm_s
   );
 }
@@ -617,8 +619,8 @@ void restore_feedrate_and_scaling() {
 
   // Software Endstops are based on the configured limits.
   axis_limits_t soft_endstop = {
-    ARRAY_N(LINEAR_AXES, X_MIN_POS, Y_MIN_POS, Z_MIN_POS, I_MIN_POS, J_MIN_POS, K_MIN_POS),
-    ARRAY_N(LINEAR_AXES, X_MAX_BED, Y_MAX_BED, Z_MAX_POS, I_MAX_POS, J_MAX_POS, K_MAX_POS)
+    ARRAY_N(LINEAR_AXES, X_MIN_POS, Y_MIN_POS, Z_MIN_POS, I_MIN_POS, J_MIN_POS, K_MIN_POS, L_MIN_POS, M_MIN_POS),
+    ARRAY_N(LINEAR_AXES, X_MAX_BED, Y_MAX_BED, Z_MAX_POS, I_MAX_POS, J_MAX_POS, K_MAX_POS, L_MAX_POS, M_MAX_POS)
   };
 
   /**
@@ -1196,7 +1198,9 @@ bool homing_needed_error(uint8_t axis_bits/*=0x07*/) {
         TEST(axis_bits, Z_AXIS) ? "Z" : "",
         TEST(axis_bits, I_AXIS) ? "I" : "",
         TEST(axis_bits, J_AXIS) ? "J" : "",
-        TEST(axis_bits, K_AXIS) ? "K" : ""
+        TEST(axis_bits, K_AXIS) ? "K" : "",
+        TEST(axis_bits, L_AXIS) ? "L" : "",
+        TEST(axis_bits, M_AXIS) ? "M" : ""
       )
     );
     SERIAL_ECHO_START();
@@ -1665,7 +1669,7 @@ void homeaxis(const AxisEnum axis) {
       destination.z=destination.z+10;
       endstops.hit_on_purpose();
         const feedRate_t real_fr_mm_s = homing_feedrate(axis);
-          do_blocking_move_to(LIST_N(LINEAR_AXES, current_position.x, current_position.y, destination.z, current_position.i, current_position.j, current_position.k), real_fr_mm_s);
+          do_blocking_move_to(LIST_N(LINEAR_AXES, current_position.x, current_position.y, destination.z, current_position.i, current_position.j, current_position.k, current_position.l, current_position.m), real_fr_mm_s);
       
       endstops.poll();
     }
@@ -1684,13 +1688,17 @@ void homeaxis(const AxisEnum axis) {
       || (A##_MIN_PIN > -1 && A##_HOME_DIR < 0) \
       || (A##_MAX_PIN > -1 && A##_HOME_DIR > 0) \
     ))
+    #undef L
+    #undef M
     if (GANG_N(LINEAR_AXES,
            !_CAN_HOME(X),
         && !_CAN_HOME(Y),
         && !_CAN_HOME(Z),
         && !_CAN_HOME(I),
         && !_CAN_HOME(J),
-        && !_CAN_HOME(K))
+        && !_CAN_HOME(K),
+        && !_CAN_HOME(L),
+        && !_CAN_HOME(M))
     ) return;
   #endif
   marlin_debug_flags|=MARLIN_DEBUG_LEVELING;

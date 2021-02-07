@@ -394,6 +394,8 @@
   #include "lpc1768/pins_BTT_SKR_V1_1.h"        // LPC1768                                env:LPC1768
 #elif MB(BTT_SKR_V1_3)
   #include "lpc1768/pins_BTT_SKR_V1_3.h"        // LPC1768                                env:LPC1768
+#elif MB(BTT_SKR_V1_3_MOTV1)
+  #include "lpc1768/pins_BTT_SKR_V1_3MOTV1.h"        // LPC1768                                env:LPC1768  
 #elif MB(BTT_SKR_V1_4)
   #include "lpc1768/pins_BTT_SKR_V1_4.h"        // LPC1768                                env:LPC1768
 
@@ -1197,6 +1199,10 @@
   #undef J_MAX_PIN
   #undef K_MIN_PIN
   #undef K_MAX_PIN
+  #undef L_MIN_PIN
+  #undef L_MAX_PIN
+  #undef M_MIN_PIN
+  #undef M_MAX_PIN
 #endif
 
 #if LINEAR_AXES >= 5
@@ -1222,6 +1228,33 @@
     #endif
   #endif
 #endif
+
+
+#if LINEAR_AXES >= 7
+  #ifdef L_STOP_PIN
+    #if L_HOME_DIR < 0
+      #define L_MIN_PIN L_STOP_PIN
+      #define L_MAX_PIN -1
+    #else
+      #define L_MIN_PIN -1
+      #define L_MAX_PIN L_STOP_PIN
+    #endif
+  #endif
+#endif
+
+
+#if LINEAR_AXES >= 8
+  #ifdef M_STOP_PIN
+    #if M_HOME_DIR < 0
+      #define M_MIN_PIN M_STOP_PIN
+      #define M_MAX_PIN -1
+    #else
+      #define M_MIN_PIN -1
+      #define M_MAX_PIN M_STOP_PIN
+    #endif
+  #endif
+#endif
+
 
 //
 // Disable unused endstop / probe pins
@@ -1261,6 +1294,16 @@
   #define K_MAX_PIN          -1
 #endif
 
+#if DISABLED(USE_LMAX_PLUG)
+  #undef L_MAX_PIN
+  #define L_MAX_PIN          -1
+#endif
+
+#if DISABLED(USE_MMAX_PLUG)
+  #undef M_MAX_PIN
+  #define M_MAX_PIN          -1
+#endif
+
 #if DISABLED(USE_XMIN_PLUG)
   #undef X_MIN_PIN
   #define X_MIN_PIN          -1
@@ -1290,6 +1333,18 @@
   #undef K_MIN_PIN
   #define K_MIN_PIN          -1
 #endif
+
+#if DISABLED(USE_LMIN_PLUG)
+  #undef L_MIN_PIN
+  #define L_MIN_PIN          -1
+#endif
+
+
+#if DISABLED(USE_MMIN_PLUG)
+  #undef M_MIN_PIN
+  #define M_MIN_PIN          -1
+#endif
+
 
 #if HAS_FILAMENT_SENSOR
   #define FIL_RUNOUT1_PIN FIL_RUNOUT_PIN
