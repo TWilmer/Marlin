@@ -45,7 +45,7 @@ enum EndstopEnum : char {
 class Endstops {
   public:
     #if LINEAR_AXES >=4 || ENABLED(HAS_EXTRA_ENDSTOPS)
-      typedef uint16_t esbits_t;
+      typedef uint32_t esbits_t;
     #else
       typedef uint8_t esbits_t;
     #endif

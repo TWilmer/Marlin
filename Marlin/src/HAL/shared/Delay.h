@@ -31,6 +31,10 @@
 
 #include "../../core/macros.h"
 
+#define A(CODE) " " CODE "\n\t"
+#define L(CODE) CODE ":\n\t"
+
+
 #if defined(__arm__) || defined(__thumb__)
 
   #if __CORTEX_M == 7

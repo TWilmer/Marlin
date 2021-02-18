@@ -67,7 +67,7 @@
 #define TMC_E5_LABEL 'E', '5'
 #define TMC_E6_LABEL 'E', '6'
 #define TMC_E7_LABEL 'E', '7'
-
+#undef A
 #define __TMC_CLASS(TYPE, L, I, A) TMCMarlin<CLASS_##TYPE, L, I, A>
 #define _TMC_CLASS(TYPE, LandI, A) __TMC_CLASS(TYPE, LandI, A)
 #define TMC_CLASS(ST, A) _TMC_CLASS(ST##_DRIVER_TYPE, TMC_##ST##_LABEL, A##_AXIS)

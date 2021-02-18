@@ -420,6 +420,7 @@ void Endstops::event_handler() {
     if (hit_state == prev_hit_state) return;
   prev_hit_state = hit_state;
   if (hit_state) {
+     SERIAL_PRINTF("X2 %d Got a hit %x\n", READ(X2_MIN_PIN),hit_state);
     #if HAS_WIRED_LCD
       char LIST_N(LINEAR_AXES, chrX = ' ', chrY = ' ', chrZ = ' ', chrI = ' ', chrJ = ' ', chrK = ' ', chrL = ' ', chrM = ' '),
            chrP = ' ';
@@ -436,7 +437,7 @@ void Endstops::event_handler() {
       if (TEST(hit_state, A ##_MIN) || TEST(hit_state, A ##_MAX)) \
         _ENDSTOP_HIT_ECHO(A,C)
 
-    #define ENDSTOP_HIT_TEST_X() _ENDSTOP_HIT_TEST(X,'X')
+    #define ENDSTOP_HIT_TEST_X() _ENDSTOP_HIT_TEST(X,'X') 
     #define ENDSTOP_HIT_TEST_Y() _ENDSTOP_HIT_TEST(Y,'Y')
     #define ENDSTOP_HIT_TEST_Z() _ENDSTOP_HIT_TEST(Z,'Z')
 
@@ -881,6 +882,7 @@ void Endstops::update() {
   #define PROCESS_DUAL_ENDSTOP(A, MINMAX) do { \
     const byte dual_hit = TEST_ENDSTOP(_ENDSTOP(A, MINMAX)) | (TEST_ENDSTOP(_ENDSTOP(A##2, MINMAX)) << 1); \
     if (dual_hit) { \
+      SERIAL_PRINTF("Dualhit %d Live state %d\n", dual_hit, live_state);\
       _ENDSTOP_HIT(A, MINMAX); \
       /* if not performing home or if both endstops were trigged during homing... */ \
       if (!stepper.separate_multi_axis || dual_hit == 0b11) \

@@ -46,7 +46,9 @@
   #endif
 #else
   #define X_MIN_PIN                        P1_29  // X-
-  //#define X_MAX_PIN                        P1_28  // X+
+  #define X_MAX_PIN                        P1_28  // X+
+ // #define X2_MIN_PIN                        P1_28  // X+
+  
 #endif
 
 #ifdef Y_STALL_SENSITIVITY
@@ -138,10 +140,16 @@
 #define J_DIR_PIN                          P0_00
 #define J_ENABLE_PIN                       P0_10
 
+/*
 
 #define K_STEP_PIN                         P0_18
 #define K_DIR_PIN                          P3_25
 #define K_ENABLE_PIN                       P1_31
+*/
+#define X2_STEP_PIN                         P0_18
+#define X2_DIR_PIN                          P3_25
+#define X2_ENABLE_PIN                       P1_31
+
 
 #define L_STEP_PIN                         P3_26
 #define L_DIR_PIN                          P0_16
@@ -211,8 +219,11 @@
 
 //SCHNASE fix these pin assignments
 
-  #define K_SERIAL_TX_PIN                 P1_21
-  #define K_SERIAL_RX_PIN                 P1_21
+//  #define K_SERIAL_TX_PIN                 P1_21
+//  #define K_SERIAL_RX_PIN                 P1_21
+
+  #define X2_SERIAL_TX_PIN                 P1_21
+  #define X2_SERIAL_RX_PIN                 P1_21
 
   #define L_SERIAL_TX_PIN                 P1_19  
   #define L_SERIAL_RX_PIN                 P1_19

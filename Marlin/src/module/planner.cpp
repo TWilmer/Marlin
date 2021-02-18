@@ -1803,9 +1803,15 @@ bool Planner::_populate_block(block_t * const block, bool split_move,
                       " C:", target.c, " (", dc, " steps)"
                       " I:", target.i, " (", di, " steps)"
                       " J:", target.j, " (", dj, " steps)"
+  #if LINEAR_AXES >= 6                      
                       " K:", target.k, " (", dk, " steps)"
+  #endif                      
+  #if LINEAR_AXES >= 7
                       " L:", target.l, " (", dl, " steps)"
+  #endif                                            
+  #if LINEAR_AXES >= 8                                            
                       " M:", target.m, " (", dmm, " steps)"
+  #endif                                            
                       #if EXTRUDERS
                         " E:", target.e, " (", de, " steps)"
                       #endif

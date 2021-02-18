@@ -169,7 +169,7 @@
  * See https://github.com/DerAndere1/Marlin/wiki
  * :[3, 4, 5, 6]
  */
-#define LINEAR_AXES 8
+#define LINEAR_AXES 5
 
 /**
  * Axis codes for additional axes:
@@ -681,7 +681,7 @@
 #define USE_XMIN_PLUG
 #define USE_YMIN_PLUG
 #define USE_ZMIN_PLUG
-//#define USE_XMAX_PLUG
+#define USE_XMAX_PLUG
 // #define USE_YMAX_PLUG
 //#define USE_ZMAX_PLUG
 
@@ -761,16 +761,16 @@
 #define X_DRIVER_TYPE  TMC2209
 #define Y_DRIVER_TYPE  TMC2209
 #define Z_DRIVER_TYPE  TMC2209
-//#define X2_DRIVER_TYPE A4988
+#define X2_DRIVER_TYPE TMC2209
 //#define Y2_DRIVER_TYPE A4988
 //#define Z2_DRIVER_TYPE A4988
 //#define Z3_DRIVER_TYPE A4988
 //#define Z4_DRIVER_TYPE A4988
 #define I_DRIVER_TYPE TMC2209
 #define J_DRIVER_TYPE TMC2209
-#define K_DRIVER_TYPE TMC2209
-#define L_DRIVER_TYPE TMC2209
-#define M_DRIVER_TYPE TMC2209
+//#define K_DRIVER_TYPE TMC2209
+//#define L_DRIVER_TYPE TMC2209
+//#define M_DRIVER_TYPE TMC2209
 
 //#define E2_DRIVER_TYPE A4988
 //#define E3_DRIVER_TYPE A4988
@@ -825,7 +825,7 @@
  * Override with M92
  *                                      X, Y, Z, [I ,[J ,[K ,]]] E0 [, E1[, E2...]]
  */ 
-#define DEFAULT_AXIS_STEPS_PER_UNIT     {LIST_N(LINEAR_AXES, 800, 800, 84, 71.1111111111, 71.1111111111,800,800,800)} 
+#define DEFAULT_AXIS_STEPS_PER_UNIT     {LIST_N(LINEAR_AXES, 800, 800, 32, 71.1111111111, 71.1111111111,800,800,800)} 
 //#define DEFAULT_AXIS_STEPS_PER_UNIT     {LIST_N(LINEAR_AXES, 100, 100, 100, 100, 17.777)}
 
 /**
@@ -833,7 +833,7 @@
  * Override with M203
  *                                      X, Y, Z, [I ,[J ,[K ,]]] E0 [, E1[, E2...]]
  */
- #define DEFAULT_MAX_FEEDRATE          {LIST_N(LINEAR_AXES, 5000, 5000, 10, 100, 100,800,800,800) }  
+ #define DEFAULT_MAX_FEEDRATE          {LIST_N(LINEAR_AXES, 5000, 5000, 2000, 5000, 5000,5000,5000,5000) }  
 //#define DEFAULT_MAX_FEEDRATE          {LIST_N(LINEAR_AXES, 5000, 5000, 5000, 5000, 100) }
 
 //#define LIMITED_MAX_FR_EDITING        // Limit edit via M203 or LCD to DEFAULT_MAX_FEEDRATE * 2
@@ -863,8 +863,8 @@
  *   M204 T    Travel Acceleration
  */
 #define DEFAULT_ACCELERATION          300    // X, Y, Z and E acceleration for printing moves
-#define DEFAULT_RETRACT_ACCELERATION  3000    // E acceleration for retracts
-#define DEFAULT_TRAVEL_ACCELERATION   3000    // X, Y, Z acceleration for travel (non printing) moves
+#define DEFAULT_RETRACT_ACCELERATION  300    // E acceleration for retracts
+#define DEFAULT_TRAVEL_ACCELERATION   300    // X, Y, Z acceleration for travel (non printing) moves
 
 /**
  * Default Jerk limits (mm/s)
@@ -1221,14 +1221,14 @@
 // Travel limits (mm) after homing, corresponding to endstop positions.
 #define X_MIN_POS 0
 #define Y_MIN_POS 0
-#define Z_MIN_POS -35
+#define Z_MIN_POS -20
 #define X_MAX_POS X_BED_SIZE
 #define Y_MAX_POS Y_BED_SIZE
-#define Z_MAX_POS 35
-#define I_MIN_POS 0
-#define I_MAX_POS 6000
-#define J_MIN_POS 0
-#define J_MAX_POS 6000
+#define Z_MAX_POS 20
+#define I_MIN_POS -360
+#define I_MAX_POS +360
+#define J_MIN_POS -360
+#define J_MAX_POS +360
 #define K_MIN_POS 0
 #define K_MAX_POS 6000
 #define L_MIN_POS 0
@@ -1485,7 +1485,7 @@
 // For DELTA this is the top-center of the Cartesian print volume.
 //#define MANUAL_X_HOME_POS 0
 //#define MANUAL_Y_HOME_POS 0
-//#define MANUAL_Z_HOME_POS 0
+#define MANUAL_Z_HOME_POS 0
 
 // Use "Z Safe Homing" to avoid homing with a Z probe outside the bed area.
 //

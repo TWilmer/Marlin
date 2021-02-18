@@ -549,13 +549,13 @@ void do_blocking_move_to_z(const float &rz, const feedRate_t &fr_mm_s/*=0.0*/) {
     do_blocking_move_to_xyz_i(current_position, ri, fr_mm_s);
   }
   void do_blocking_move_to_xyz_i(const xyze_pos_t &raw, const float &i, const feedRate_t &fr_mm_s/*=0.0f*/) {
-	  do_blocking_move_to(raw.x, raw.y, raw.z, i, raw.j, raw.k, raw.l, raw.m, fr_mm_s);
+	  do_blocking_move_to( LIST_N(LINEAR_AXES, raw.x, raw.y, raw.z, i, raw.j, raw.k, raw.l, raw.m ), fr_mm_s);
   }
   void do_blocking_move_to_j(const float &rj, const feedRate_t &fr_mm_s/*=0.0*/) {
     do_blocking_move_to_xyzi_j(current_position, rj, fr_mm_s);
   }
   void do_blocking_move_to_xyzi_j(const xyze_pos_t &raw, const float &j, const feedRate_t &fr_mm_s/*=0.0f*/) {
-    do_blocking_move_to(raw.x, raw.y, raw.z, raw.i, j, raw.l, raw.m, fr_mm_s);
+    do_blocking_move_to( LIST_N(LINEAR_AXES,raw.x, raw.y, raw.z, raw.i, j, raw.l, raw.m ), fr_mm_s);
   }
 #endif
 
@@ -1656,7 +1656,7 @@ void homeaxis(const AxisEnum axis) {
   
   
   if (axis == Z_AXIS)
-  {
+  { 
  
     endstops.poll();
      SERIAL_PRINTF("Home2  state: %x  cur %f", READ(Z_MIN_PIN),current_position.z);
@@ -1666,7 +1666,7 @@ void homeaxis(const AxisEnum axis) {
       SERIAL_PRINTF("Home  state: %x  cur %f", READ(Z_MIN_PIN),current_position.z);
       
       destination=current_position;
-      destination.z=destination.z+10;
+      destination.z=destination.z+0.5;
       endstops.hit_on_purpose();
         const feedRate_t real_fr_mm_s = homing_feedrate(axis);
           do_blocking_move_to(LIST_N(LINEAR_AXES, current_position.x, current_position.y, destination.z, current_position.i, current_position.j, current_position.k, current_position.l, current_position.m), real_fr_mm_s);
@@ -1676,7 +1676,8 @@ void homeaxis(const AxisEnum axis) {
     endstops.global_enabled();
   }
 
-    
+    SERIAL_PRINTF("Home47  state: %x  cur %f", READ(Z_MIN_PIN),current_position.z);
+      
 
 #if IS_SCARA
     // Only Z homing (with probe) is permitted
@@ -1732,7 +1733,7 @@ void homeaxis(const AxisEnum axis) {
    
         while (IN_ENDSTOP( X_MIN )) {
           if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Move out of home sensor.");
-          do_homing_move(axis, 5 * -axis_home_dir);
+          do_homing_move(axis, 1 * -axis_home_dir);
         }
         break;
       case Y_AXIS:
@@ -1776,8 +1777,17 @@ void homeaxis(const AxisEnum axis) {
     if (((ENABLED(X_SENSORLESS) && axis == X_AXIS) || (ENABLED(Y_SENSORLESS) && axis == Y_AXIS)) && backoff[axis])
       do_homing_move(axis, -ABS(backoff[axis]) * axis_home_dir, homing_feedrate(axis));
   #endif
+DEBUG_ECHOLNPGM("Home MOve...\n");
+
+    SERIAL_PRINTF("HomeA3  state: %x  cur %f\n", READ(X_MIN_PIN),current_position.x);
+    SERIAL_PRINTF("HomeA4  state: %x  cur %f\n", READ(X2_MIN_PIN),current_position.x);
+     
 
   do_homing_move(axis, 1.5f * max_length(TERN(DELTA, Z_AXIS, axis)) * axis_home_dir);
+    SERIAL_PRINTF("Home3  state: %x  cur %f\n", READ(X_MIN_PIN),current_position.x);
+    SERIAL_PRINTF("Home4  state: %x  cur %f\n", READ(X2_MIN_PIN),current_position.x);
+        
+  DEBUG_ECHOLNPGM("Home MOve...done\n");
 
   #if BOTH(HOMING_Z_WITH_PROBE, BLTOUCH) && DISABLED(BLTOUCH_HS_MODE)
     if (axis == Z_AXIS) bltouch.stow(); // Intermediate STOW (in LOW SPEED MODE)
@@ -1820,7 +1830,7 @@ void homeaxis(const AxisEnum axis) {
     #if BOTH(HOMING_Z_WITH_PROBE, BLTOUCH) && DISABLED(BLTOUCH_HS_MODE)
       if (axis == Z_AXIS && bltouch.deploy()) return; // Intermediate DEPLOY (in LOW SPEED MODE)
     #endif
-
+      DEBUG_ECHOLNPGM("Move 2nd time:");
     do_homing_move(axis, 2 * bump, get_homing_bump_feedrate(axis));
 
     #if BOTH(HOMING_Z_WITH_PROBE, BLTOUCH)
@@ -1834,6 +1844,7 @@ void homeaxis(const AxisEnum axis) {
       if (axis == X_AXIS) {
         const float adj = ABS(endstops.x2_endstop_adj);
         if (adj) {
+              DEBUG_ECHOLNPGM("Do Adjustment");
           if (pos_dir ? (endstops.x2_endstop_adj > 0) : (endstops.x2_endstop_adj < 0)) stepper.set_x_lock(true); else stepper.set_x2_lock(true);
           do_homing_move(axis, pos_dir ? -adj : adj);
           stepper.set_x_lock(false);

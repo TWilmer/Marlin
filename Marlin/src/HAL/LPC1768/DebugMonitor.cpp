@@ -30,6 +30,9 @@
 #include "watchdog.h"
 #include <debug_frmwrk.h>
 
+#define A(CODE) " " CODE "\n\t"
+#define L(CODE) CODE ":\n\t"
+
 
 // Debug monitor that dumps to the Programming port all status when
 // an exception or WDT timeout happens - And then resets the board

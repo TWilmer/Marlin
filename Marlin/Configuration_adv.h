@@ -532,10 +532,10 @@
  * in X2. Dual endstop offsets can be set at runtime with 'M666 X<offset> Y<offset> Z<offset>'.
  */
 
-//#define X_DUAL_STEPPER_DRIVERS
+#define X_DUAL_STEPPER_DRIVERS
 #if ENABLED(X_DUAL_STEPPER_DRIVERS)
   #define INVERT_X2_VS_X_DIR true   // Set 'true' if X motors should rotate in opposite directions
-  //#define X_DUAL_ENDSTOPS
+  #define X_DUAL_ENDSTOPS
   #if ENABLED(X_DUAL_ENDSTOPS)
     #define X2_USE_ENDSTOP _XMAX_
     #define X2_ENDSTOP_ADJUSTMENT  0
@@ -636,7 +636,7 @@
 
 //#define SENSORLESS_BACKOFF_MM  { 2, 2 }     // (mm) Backoff from endstops before sensorless homing
 
-#define HOMING_BUMP_MM      ARRAY_N(LINEAR_AXES, 5, 5, 5, 5, 5, 5, 5, 5)       // (mm) Backoff from endstops after first bump
+#define HOMING_BUMP_MM      ARRAY_N(LINEAR_AXES, 1, 1, 1, 5, 5, 5, 5, 5)       // (mm) Backoff from endstops after first bump
 #define HOMING_BUMP_DIVISOR ARRAY_N(LINEAR_AXES, 2, 2, 2, 2, 2, 2, 2, 2)       // Re-Bump Speed Divisor (Divides the Homing Feedrate)
 //#define HOMING_BACKOFF_POST_MM ARRAY_N(LINEAR_AXES, 2, 2, 2, 2, 2, 2)  // (mm) Backoff from endstops after homing
 
@@ -1693,7 +1693,7 @@
   //#define PROBING_MARGIN_BACK PROBING_MARGIN
 #endif
 
-#if EITHER(MESH_BED_LEVELING, AUTO_BED_LEVELING_UBL)
+#if EITHER(DUESH_BED_LEVELING, AUTO_BED_LEVELING_UBL)
   // Override the mesh area if the automatic (max) area is too large
   //#define MESH_MIN_X MESH_INSET
   //#define MESH_MIN_Y MESH_INSET
@@ -2285,8 +2285,8 @@
 
   #if AXIS_IS_TMC(X2)
     #define X2_CURRENT      800
-    #define X2_CURRENT_HOME X2_CURRENT
-    #define X2_MICROSTEPS    16
+    #define X2_CURRENT_HOME 200
+    #define X2_MICROSTEPS    128
     #define X2_RSENSE         0.11
     #define X2_CHAIN_POS     -1
   #endif
@@ -2310,7 +2310,7 @@
   #if AXIS_IS_TMC(Z)
     #define Z_CURRENT       800
     #define Z_CURRENT_HOME  Z_CURRENT
-    #define Z_MICROSTEPS     128
+    #define Z_MICROSTEPS     16
     #define Z_RSENSE          0.11
     #define Z_CHAIN_POS      -1
   #endif
